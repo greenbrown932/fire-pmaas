@@ -1,0 +1,90 @@
+{{define "content"}}
+<div class="properties-page">
+    <div class="page-header">
+        <div class="header-actions">
+            <button class="btn btn-primary">➕ Add New Property</button>
+            <button class="btn btn-secondary">📊 Export Data</button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <div class="filter-group">
+            <select class="form-control">
+                <option>All Status</option>
+                <option>Occupied</option>
+                <option>Vacant</option>
+                <option>Maintenance</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <input type="text" class="form-control" placeholder="Search by address...">
+        </div>
+        <div class="filter-group">
+            <select class="form-control">
+                <option>All Bedrooms</option>
+                <option>1 Bedroom</option>
+                <option>2 Bedrooms</option>
+                <option>3+ Bedrooms</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Properties Table -->
+    <div class="properties-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Address</th>
+                    <th>Rent</th>
+                    <th>Status</th>
+                    <th>Bedrooms</th>
+                    <th>Bathrooms</th>
+                    <th>Sq Ft</th>
+                    <th>Tenant</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Properties}}
+                <tr>
+                    <td>
+                        <div class="property-info">
+                            <strong>{{.Address}}</strong>
+                        </div>
+                    </td>
+                    <td class="rent">${{.Rent}}/mo</td>
+                    <td>
+                        <span class="status status-{{.Status}}">{{.Status}}</span>
+                    </td>
+                    <td>{{.Bedrooms}}</td>
+                    <td>{{.Bathrooms}}</td>
+                    <td>{{.SquareFeet}}</td>
+                    <td>
+                        {{if .Tenant}}
+                            <span class="tenant-name">{{.Tenant}}</span>
+                        {{else}}
+                            <em class="no-tenant">No Tenant</em>
+                        {{end}}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/properties/{{.ID}}" class="btn btn-small btn-primary">View</a>
+                            <button class="btn btn-small btn-secondary">Edit</button>
+                            <button class="btn btn-small btn-danger">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <button class="btn btn-secondary" disabled>« Previous</button>
+        <span class="page-info">Page 1 of 1</span>
+        <button class="btn btn-secondary" disabled>Next »</button>
+    </div>
+</div>
+{{end}}

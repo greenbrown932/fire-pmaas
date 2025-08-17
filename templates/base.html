@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - PMaaS Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>PMaaS</h2>
+                <p>Property Management</p>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">🏠 Dashboard</a></li>
+                <li><a href="/properties" class="nav-link">🏢 Properties</a></li>
+                <li><a href="/tenants" class="nav-link">👥 Tenants</a></li>
+                <li><a href="/maintenance" class="nav-link">🔧 Maintenance</a></li>
+                <li><a href="#" class="nav-link">💰 Payments</a></li>
+                <li><a href="#" class="nav-link">📊 Reports</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h1>{{.Title}}</h1>
+                <div class="user-info">
+                    <span>Welcome, Admin</span>
+                    <button class="btn btn-secondary">Settings</button>
+                </div>
+            </header>
+
+            <div class="content">
+                {{template "content" .}}
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+{{define "content"}}
+<div class="maintenance-page">
+    <div class="page-header">
+        <div class="header-actions">
+            <button class="btn btn-primary">🔧 New Maintenance Request</button>
+            <button class="btn btn-secondary">👷 Manage Contractors</button>
+            <button class="btn btn-secondary">📊 Export Reports</button>
+        </div>
+    </div>
+
+    <!-- Maintenance Stats -->
+    <div class="maintenance-stats">
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+                <h3>12</h3>
+                <p>Open Requests</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-content">
+                <h3>3</h3>
+                <p>High Priority</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <h3>45</h3>
+                <p>Completed This Month</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <h3>$3,240</h3>
+                <p>Monthly Maintenance Costs</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <div class="filter-group">
+            <select class="form-control">
+                <option>All Requests</option>
+                <option>Open</option>
+                <option>In Progress</option>
+                <option>Completed</option>
+                <option>High Priority</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <select class="form-control">
+                <option>All Properties</option>
+                <option>123 Main St</option>
+                <option>456 Oak Ave</option>
+                <option>789 Pine St</option>
+                <option>321 Elm Dr</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <input type="text" class="form-control" placeholder="Search by description...">
+        </div>
+    </div>
+
+    <!-- Maintenance Requests Table -->
+    <div class="maintenance-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Property</th>
+                    <th>Tenant</th>
+                    <th>Issue Description</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Date Created</th>
+                    <th>Estimated Cost</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>MR-001</strong></td>
+                    <td>123 Main St</td>
+                    <td>John Smith</td>
+                    <td>Leaky kitchen faucet needs repair</td>
+                    <td><span class="priority priority-low">Low</span></td>
+                    <td><span class="status status-open">Open</span></td>
+                    <td>Aug 14, 2025</td>
+                    <td>$150</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-small btn-primary">Assign</button>
+                            <button class="btn btn-small btn-secondary">View</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>MR-002</strong></td>
+                    <td>789 Pine St</td>
+                    <td>Sarah Johnson</td>
+                    <td>Heating system not working properly</td>
+                    <td><span class="priority priority-high">High</span></td>
+                    <td><span class="status status-progress">In Progress</span></td>
+                    <td>Aug 12, 2025</td>
+                    <td>$500</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-small btn-warning">Update</button>
+                            <button class="btn btn-small btn-secondary">View</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>MR-003</strong></td>
+                    <td>321 Elm Dr</td>
+                    <td>—</td>
+                    <td>Bathroom tile repair needed</td>
+                    <td><span class="priority priority-medium">Medium</span></td>
+                    <td><span class="status status-open">Open</span></td>
+                    <td>Aug 10, 2025</td>
+                    <td>$300</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-small btn-primary">Assign</button>
+                            <button class="btn btn-small btn-secondary">View</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>MR-004</strong></td>
+                    <td>456 Oak Ave</td>
+                    <td>—</td>
+                    <td>Replace broken window</td>
+                    <td><span class="priority priority-high">High</span></td>
+                    <td><span class="status status-completed">Completed</span></td>
+                    <td>Aug 8, 2025</td>
+                    <td>$200</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-small btn-success">Review</button>
+                            <button class="btn btn-small btn-secondary">View</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Contractor Management -->
+    <div class="contractor-section">
+        <h2>Preferred Contractors</h2>
+        <div class="contractor-grid">
+            <div class="contractor-card">
+                <div class="contractor-info">
+                    <h3>Boston Plumbing Pro</h3>
+                    <p>Plumbing & Water Systems</p>
+                    <div class="contractor-rating">
+                        <span>⭐⭐⭐⭐⭐</span>
+                        <span>4.9/5</span>
+                    </div>
+                </div>
+                <div class="contractor-contact">
+                    <p><strong>Phone:</strong> (617) 555-0123</p>
+                    <p><strong>Email:</strong> contact@bostonplumbing.com</p>
+                    <button class="btn btn-small btn-primary">Contact</button>
+                </div>
+            </div>
+            
+            <div class="contractor-card">
+                <div class="contractor-info">
+                    <h3>Cambridge HVAC Experts</h3>
+                    <p>Heating & Cooling Systems</p>
+                    <div class="contractor-rating">
+                        <span>⭐⭐⭐⭐⭐</span>
+                        <span>4.8/5</span>
+                    </div>
+                </div>
+                <div class="contractor-contact">
+                    <p><strong>Phone:</strong> (617) 555-0456</p>
+                    <p><strong>Email:</strong> service@cambridgehvac.com</p>
+                    <button class="btn btn-small btn-primary">Contact</button>
+                </div>
+            </div>
+            
+            <div class="contractor-card">
+                <div class="contractor-info">
+                    <h3>Metro Handyman Services</h3>
+                    <p>General Repairs & Maintenance</p>
+                    <div class="contractor-rating">
+                        <span>⭐⭐⭐⭐</span>
+                        <span>4.7/5</span>
+                    </div>
+                </div>
+                <div class="contractor-contact">
+                    <p><strong>Phone:</strong> (617) 555-0789</p>
+                    <p><strong>Email:</strong> help@metrohandyman.com</p>
+                    <button class="btn btn-small btn-primary">Contact</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.maintenance-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.priority {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.priority-high {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.priority-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.priority-low {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-open {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-progress {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-completed {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.contractor-section {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+}
+
+.contractor-section h2 {
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.contractor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.contractor-card {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.contractor-info h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.contractor-info p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.contractor-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.contractor-contact p {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #059669;
+}
+</style>
+{{end}}
