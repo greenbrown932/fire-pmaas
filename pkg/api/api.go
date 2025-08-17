@@ -50,7 +50,7 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Calculate stats
-	for _, p := range models.properties {
+	for _, p := range models.Properties {
 		data.Stats.TotalProperties++
 		switch p.Status {
 		case "Occupied":
@@ -69,10 +69,10 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 func handleProperties(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Title      string
-		Properties []Property
+		Properties []models.Property
 	}{
 		Title:      "All Properties",
-		Properties: properties,
+		Properties: models.Properties,
 	}
 	renderTemplate(w, "properties.html", data)
 }
@@ -81,10 +81,10 @@ func handlePropertyDetail(w http.ResponseWriter, r *http.Request) {
 	// In a real app, you'd parse the ID and look up the property
 	data := struct {
 		Title    string
-		Property Property
+		Property models.Property
 	}{
 		Title:    "Property Details",
-		Property: properties[0], // Mock - using first property
+		Property: models.Properties[0], // Mock - using first property
 	}
 	renderTemplate(w, "property-detail.html", data)
 }
@@ -92,10 +92,10 @@ func handlePropertyDetail(w http.ResponseWriter, r *http.Request) {
 func handleTenants(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Title      string
-		Properties []Property
+		Properties []models.Property
 	}{
 		Title:      "Tenant Management",
-		Properties: properties,
+		Properties: models.Properties,
 	}
 	renderTemplate(w, "tenants.html", data)
 }
