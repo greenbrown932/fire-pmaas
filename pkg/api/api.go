@@ -2,11 +2,11 @@ package api
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"path/filepath"
 
 	"github.com/go-chi/chi"
+	"github.com/greenbrown932/fire-pmaas/pkg/middleware"
 	"github.com/greenbrown932/fire-pmaas/pkg/models"
 )
 
@@ -21,16 +21,16 @@ func RegisterRoutes(r *chi.Mux) {
 		w.Write([]byte("OK"))
 	})
 
-	// Web Routes
-	r.Get("/", handleDashboard)
-	r.Get("/properties", handleProperties)
-	r.Get("/properties/{id}", handlePropertyDetail)
-	r.Get("/tenants", handleTenants)
-	r.Get("/maintenance", handleMaintenance)
+	r.Group(func(auth chi.Router) {
+		auth.Use(middleware.RequireLogin)
+		auth.Get("/", handleDashboard)
+		auth.Get("/properties", handleProperties)
+		auth.Get("/properties/{id}", handlePropertyDetail)
+		auth.Get("/tenants", handleTenants)
+		auth.Get("/maintenance", handleMaintenance)
+		auth.Get("/callback", middleware.HandleCallback)
+	})
 
-	log.Println("Starting server on :8000")
-	log.Println("Dashboard: http://localhost:8000")
-	http.ListenAndServe(":8000", r)
 }
 
 func handleDashboard(w http.ResponseWriter, r *http.Request) {
