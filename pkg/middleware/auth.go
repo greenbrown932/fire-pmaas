@@ -11,9 +11,9 @@ import (
 
 var (
 	// You'll want to load these from environment variables in production!
-	clientID       = "fire-webapp"                      // Must match Keycloak client exactly
-	clientSecret   = "YS221HdfgaWkgCfJ9rJNeKXmAciBuzQG" // Add your actual client secret here
-	keycloakIssuer = "http://localhost:8080/realms/pmaas"
+	clientID       = "pmaas-app"                        // Must match Keycloak client exactly
+	clientSecret   = "CALTAkts8DxnpjCeD6xSDcavEetqMrxl" // Add your actual client secret here
+	keycloakIssuer = "http://keycloak:8080/realms/pmaas"
 	redirectURL    = "http://localhost:8000/callback"
 
 	provider     *oidc.Provider
@@ -58,7 +58,7 @@ func RequireLogin(next http.Handler) http.Handler {
 		}
 
 		// If not authenticated (or token not valid), redirect to Keycloak for login
-		keycloakAuthURL := keycloakIssuer + "/protocol/openid-connect/auth" +
+		keycloakAuthURL := "http://localhost:8080/realms/pmaas/protocol/openid-connect/auth" +
 			"?client_id=" + clientID +
 			"&redirect_uri=" + redirectURL +
 			"&response_type=code" +
