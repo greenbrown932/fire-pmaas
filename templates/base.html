@@ -1,45 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}} - PMaaS Platform</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{{.Title}} - PMaaS Platform</title>
+
+  <!-- Pico.css: modern, class-lite CSS framework -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
+
+  <!-- Shoelace: framework-agnostic Web Components -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.css" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
+
+  <!-- Chart.js for small KPI sparkline charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- Your custom styles (kept, but we’ll extend) -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    /* Layout container using CSS Grid for sidebar + main */
+    body { min-height: 100vh; }
+    .shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    @media (max-width: 960px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar-panel { display: none; }
+    }
+
+    /* Sidebar using Shoelace card tone */
+    .sidebar-panel {
+      background: var(--sl-color-neutral-900);
+      border-right: 1px solid var(--sl-color-neutral-700);
+    }
+    .brand {
+      display:flex; align-items:center; gap:.6rem; padding:1rem 1.25rem;
+      border-bottom: 1px solid var(--sl-color-neutral-700);
+    }
+    .brand h2 { margin:0; letter-spacing:-.01em; }
+
+    .nav {
+      display:flex; flex-direction:column; padding:.5rem;
+      gap:.25rem;
+    }
+    .nav a {
+      display:flex; align-items:center; gap:.6rem;
+      padding:.7rem .9rem; border-radius: .6rem; color: var(--sl-color-neutral-200);
+      text-decoration:none;
+    }
+    .nav a:hover, .nav a[aria-current="page"] {
+      background: var(--sl-color-neutral-800);
+      color: var(--sl-color-neutral-0);
+    }
+
+    /* Header bar */
+    .appbar {
+      position: sticky; top:0; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding: .85rem 1.2rem;
+      background: color-mix(in oklab, var(--sl-color-neutral-900) 88%, transparent);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--sl-color-neutral-700);
+    }
+
+    /* Main content container */
+    .content { padding: 1.25rem; }
+    .page { max-width: 1280px; margin: 0 auto; }
+
+    /* Card grid helpers */
+    .kpi-grid {
+      display:grid; gap:1rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-bottom: 1rem;
+    }
+
+    /* Shoelace cards harmonize with your classes */
+    sl-card {
+      --padding: 1rem;
+      border: 1px solid var(--sl-color-neutral-700);
+    }
+
+    .kpi {
+      display:grid; grid-template-columns: 56px 1fr; gap: .9rem; align-items:center;
+    }
+    .kpi-icon {
+      width:56px; height:56px; border-radius:14px; display:grid; place-items:center;
+      background: linear-gradient(135deg, #1a2f33 0%, #234b51 100%);
+      color: var(--sl-color-primary-300);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      font-size: 1.3rem;
+    }
+    .kpi h3 { margin:0; font-size: 1.75rem; }
+    .kpi p  { margin:0; color: var(--sl-color-neutral-300); }
+
+    /* Quick actions */
+    .action-row { display:flex; flex-wrap:wrap; gap:.6rem; }
+
+    /* Tables inside sl-card */
+    .table { width:100%; border-collapse: collapse; }
+    .table th, .table td { padding:.75rem .85rem; border-top: 1px solid var(--sl-color-neutral-700); }
+    .table thead th { background: var(--sl-color-neutral-850); color: var(--sl-color-neutral-200); }
+
+    /* Keep your existing classes working */
+    .main-content { margin-left: 0; padding: 0; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Navigation -->
-        <nav class="sidebar">
-            <div class="logo">
-                <h2>PMaaS</h2>
-                <p>Property Management</p>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="/" class="nav-link">🏠 Dashboard</a></li>
-                <li><a href="/properties" class="nav-link">🏢 Properties</a></li>
-                <li><a href="/tenants" class="nav-link">👥 Tenants</a></li>
-                <li><a href="/maintenance" class="nav-link">🔧 Maintenance</a></li>
-                <li><a href="#" class="nav-link">💰 Payments</a></li>
-                <li><a href="#" class="nav-link">📊 Reports</a></li>
-            </ul>
-        </nav>
+  <div class="shell">
+    <!-- Sidebar -->
+    <aside class="sidebar-panel">
+      <div class="brand">
+        <sl-icon name="building"></sl-icon>
+        <h2>PMaaS</h2>
+      </div>
+      <nav class="nav" aria-label="Main">
+        <a href="/" aria-current="page"><sl-icon name="house"></sl-icon> Dashboard</a>
+        <a href="/properties"><sl-icon name="building"></sl-icon> Properties</a>
+        <a href="/tenants"><sl-icon name="people"></sl-icon> Tenants</a>
+        <a href="/maintenance"><sl-icon name="wrench"></sl-icon> Maintenance</a>
+        <a href="#"><sl-icon name="card-text"></sl-icon> Payments</a>
+        <a href="#"><sl-icon name="graph-up"></sl-icon> Reports</a>
+      </nav>
+    </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="header">
-                <h1>{{.Title}}</h1>
-                <div class="user-info">
-                    <span>Welcome, Admin</span>
-                    <button class="btn btn-secondary">Settings</button>
-                </div>
-            </header>
+    <!-- Main column -->
+    <div>
+      <!-- App bar -->
+      <div class="appbar">
+        <strong>{{.Title}}</strong>
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <sl-avatar label="Admin" initials="AD" color="teal"></sl-avatar>
+          <sl-button size="small" variant="neutral" caret>Settings</sl-button>
+        </div>
+      </div>
 
-            <div class="content">
-                {{template "content" .}}
-            </div>
-        </main>
+      <!-- Content -->
+      <div class="content">
+        <div class="page">
+          {{block "content" .}}
+            <p>Content unavailable</p>
+          {{ end }}
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script src="/static/js/main.js"></script>
+  <!-- Your JS (enhanced) -->
+  <script src="/static/js/main.js"></script>
 </body>
 </html>
+

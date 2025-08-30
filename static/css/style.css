@@ -1270,4 +1270,26 @@ body {
     .quick-actions .btn {
         width: 100%;
     }
+
+/* Harmonize old classes with Shoelace + Pico */
+.dashboard .stat-card,
+.property-card,
+.quick-actions,
+.alerts {
+  background: var(--sl-color-neutral-900);
+  border: 1px solid var(--sl-color-neutral-700);
+  border-radius: 16px;
+}
+
+.status-occupied   { background: color-mix(in oklab, #22c55e 15%, transparent); color: #22c55e; border: 1px solid color-mix(in oklab, #22c55e 30%, transparent); }
+.status-vacant     { background: color-mix(in oklab, #f59e0b 15%, transparent); color: #f59e0b; border: 1px solid color-mix(in oklab, #f59e0b 30%, transparent); }
+.status-maintenance{ background: color-mix(in oklab, #ef4444 15%, transparent); color: #ef4444; border: 1px solid color-mix(in oklab, #ef4444 30%, transparent); }
+
+.btn { border-radius: 10px; }
+.kpi-grid { align-items: stretch; }
+.kpi { min-heigh: 110px }
+.kpi canvas { display:block; width:100%; height:34px !important; }
+
+/* General canvas rule to avoid intrinsic aspect surprises */
+canvas { max-width: 100%; }
 }

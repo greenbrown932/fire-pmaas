@@ -1,89 +1,39 @@
 {{define "content"}}
-<div class="dashboard">
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">🏢</div>
-            <div class="stat-content">
-                <h3>{{.Stats.TotalProperties}}</h3>
-                <p>Total Properties</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-content">
-                <h3>{{.Stats.Occupied}}</h3>
-                <p>Occupied Units</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">❌</div>
-            <div class="stat-content">
-                <h3>{{.Stats.Vacant}}</h3>
-                <p>Vacant Units</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">💰</div>
-            <div class="stat-content">
-                <h3>${{.Stats.MonthlyRevenue}}</h3>
-                <p>Monthly Revenue</p>
-            </div>
-        </div>
+<div class="kpi-grid">
+  <sl-card class="kpi">
+    <div class="kpi-icon">🏢</div>
+    <div>
+      <h3>{{.Stats.TotalProperties}}</h3>
+      <p>Total Properties</p>
+      <canvas id="sparkTotal" height="34"></canvas>
     </div>
+  </sl-card>
 
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="action-buttons">
-            <button class="btn btn-primary">➕ Add Property</button>
-            <button class="btn btn-primary">👤 Add Tenant</button>
-            <button class="btn btn-primary">🔧 New Maintenance</button>
-            <button class="btn btn-primary">💰 Record Payment</button>
-        </div>
+  <sl-card class="kpi">
+    <div class="kpi-icon">✅</div>
+    <div>
+      <h3>{{.Stats.Occupied}}</h3>
+      <p>Occupied Units</p>
+      <canvas id="sparkOcc" height="34"></canvas>
     </div>
+  </sl-card>
 
-    <!-- Recent Properties -->
-    <div class="recent-properties">
-        <h2>Recent Properties</h2>
-        <div class="property-grid">
-            {{range .Properties}}
-            <div class="property-card">
-                <div class="property-header">
-                    <h3>{{.Address}}</h3>
-                    <span class="status status-{{.Status}}">{{.Status}}</span>
-                </div>
-                <div class="property-details">
-                    <p><strong>Rent:</strong> ${{.Rent}}/month</p>
-                    <p><strong>Specs:</strong> {{.Bedrooms}} bed, {{.Bathrooms}} bath, {{.SquareFeet}} sq ft</p>
-                    {{if .Tenant}}
-                        <p><strong>Tenant:</strong> {{.Tenant}}</p>
-                    {{else}}
-                        <p><strong>Tenant:</strong> <em>None</em></p>
-                    {{end}}
-                </div>
-                <div class="property-actions">
-                    <a href="/properties/{{.ID}}" class="btn btn-small">View Details</a>
-                </div>
-            </div>
-            {{end}}
-        </div>
+  <sl-card class="kpi">
+    <div class="kpi-icon">❌</div>
+    <div>
+      <h3>{{.Stats.Vacant}}</h3>
+      <p>Vacant Units</p>
+      <canvas id="sparkVac" height="34"></canvas>
     </div>
+  </sl-card>
 
-    <!-- Alerts & Notifications -->
-    <div class="alerts">
-        <h2>Alerts & Notifications</h2>
-        <div class="alert-list">
-            <div class="alert alert-warning">
-                <strong>⚠️ Maintenance Required:</strong> 321 Elm Dr - Heating system inspection overdue
-            </div>
-            <div class="alert alert-info">
-                <strong>ℹ️ Rent Due:</strong> 3 tenants have rent due in the next 5 days
-            </div>
-            <div class="alert alert-success">
-                <strong>✅ Payment Received:</strong> John Smith - $2,500 for 123 Main St
-            </div>
-        </div>
+  <sl-card class="kpi">
+    <div class="kpi-icon">💰</div>
+    <div>
+      <h3>${{.Stats.MonthlyRevenue}}</h3>
+      <p>Monthly Revenue</p>
+      <canvas id="sparkRev" height="34"></canvas>
     </div>
+  </sl-card>
 </div>
 {{end}}
