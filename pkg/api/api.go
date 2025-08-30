@@ -20,7 +20,7 @@ func RegisterRoutes(r *chi.Mux) {
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
-
+	r.Get("/callback", middleware.HandleCallback)
 	r.Group(func(auth chi.Router) {
 		auth.Use(middleware.RequireLogin)
 		auth.Get("/", handleDashboard)
@@ -28,7 +28,7 @@ func RegisterRoutes(r *chi.Mux) {
 		auth.Get("/properties/{id}", handlePropertyDetail)
 		auth.Get("/tenants", handleTenants)
 		auth.Get("/maintenance", handleMaintenance)
-		auth.Get("/callback", middleware.HandleCallback)
+
 	})
 
 }
