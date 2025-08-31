@@ -75,31 +75,6 @@ func RequireLogin(next http.Handler) http.Handler {
 	})
 }
 
-// Middleware that protects routes and enforces login via Keycloak OIDC.
-// func RequireLogin(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		// Check for a valid ID token cookie first
-// 		if cookie, err := r.Cookie("id_token"); err == nil && cookie.Value != "" {
-// 			// Validate the ID token (important—never trust the cookie blindly)
-// 			ctx := r.Context()
-// 			_, err := provider.Verifier(oidcConfig).Verify(ctx, cookie.Value)
-// 			if err == nil {
-// 				next.ServeHTTP(w, r)
-// 				return
-// 			}
-// 			// Invalid token—fall through to redirect
-// 		}
-
-// If not authenticated (or token not valid), redirect to Keycloak for login
-// 		keycloakAuthURL := "http://localhost:8080/realms/pmaas/protocol/openid-connect/auth" +
-// 			"?client_id=" + clientID +
-// 			"&redirect_uri=" + redirectURL +
-// 			"&response_type=code" +
-// 			"&scope=openid%20email%20profile"
-// 		http.Redirect(w, r, keycloakAuthURL, http.StatusFound)
-// 	})
-// }
-
 // Handler for the OIDC callback from Keycloak.
 // Exchanges the authorization code for tokens, validates them, and sets session cookie.
 func HandleCallback(w http.ResponseWriter, r *http.Request) {

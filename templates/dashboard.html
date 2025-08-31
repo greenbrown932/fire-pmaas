@@ -1,39 +1,94 @@
-{{define "content"}}
-<div class="kpi-grid">
-  <sl-card class="kpi">
-    <div class="kpi-icon">🏢</div>
-    <div>
-      <h3>{{.Stats.TotalProperties}}</h3>
-      <p>Total Properties</p>
-      <canvas id="sparkTotal" height="34"></canvas>
-    </div>
-  </sl-card>
+{{template "base.html" .}}
 
-  <sl-card class="kpi">
-    <div class="kpi-icon">✅</div>
-    <div>
-      <h3>{{.Stats.Occupied}}</h3>
-      <p>Occupied Units</p>
-      <canvas id="sparkOcc" height="34"></canvas>
+{{block "content" .}}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-700">Total Properties</h3>
+        <p class="text-3xl font-bold text-gray-900">{{.Stats.TotalProperties}}</p>
     </div>
-  </sl-card>
-
-  <sl-card class="kpi">
-    <div class="kpi-icon">❌</div>
-    <div>
-      <h3>{{.Stats.Vacant}}</h3>
-      <p>Vacant Units</p>
-      <canvas id="sparkVac" height="34"></canvas>
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-700">Occupied</h3>
+        <p class="text-3xl font-bold text-green-500">{{.Stats.Occupied}}</p>
     </div>
-  </sl-card>
-
-  <sl-card class="kpi">
-    <div class="kpi-icon">💰</div>
-    <div>
-      <h3>${{.Stats.MonthlyRevenue}}</h3>
-      <p>Monthly Revenue</p>
-      <canvas id="sparkRev" height="34"></canvas>
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-700">Vacant</h3>
+        <p class="text-3xl font-bold text-yellow-500">{{.Stats.Vacant}}</p>
     </div>
-  </sl-card>
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-700">Under Maintenance</h3>
+        <p class="text-3xl font-bold text-red-500">{{.Stats.Maintenance}}</p>
+    </div>
 </div>
+
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-4">Property Status Overview</h3>
+        <div class="relative h-80">
+            <canvas id="propertyStatusChart"></canvas>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-4">Recent Properties</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Address</th>
+                        <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Status</th>
+                        <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Rent</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    {{range .Properties}}
+                    <tr>
+                        <td class="text-left py-3 px-4">{{.Address}}</td>
+                        <td class="text-left py-3 px-4">
+                            <span class="px-2 py-1 font-semibold leading-tight 
+                                {{if eq .Status "Occupied"}} text-green-700 bg-green-100 
+                                {{else if eq .Status "Vacant"}} text-yellow-700 bg-yellow-100
+                                {{else}} text-red-700 bg-red-100 {{end}} rounded-sm">
+                                {{.Status}}
+                            </span>
+                        </td>
+                        <td class="text-left py-3 px-4">${{.Rent}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Define the data array separately for cleaner code
+        const propertyData = [{{.Stats.Occupied}}, {{.Stats.Vacant}}, {{.Stats.Maintenance}}];
+        const ctx = document.getElementById('propertyStatusChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Occupied', 'Vacant', 'Maintenance'],
+                datasets: [{
+                    label: 'Property Status',
+                    data: propertyData,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(255, 99, 132, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    });
+</script>
 {{end}}

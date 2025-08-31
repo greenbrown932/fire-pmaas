@@ -1,92 +1,80 @@
-{{define "content"}}
-<div class="properties-page">
-    <div class="page-header">
-        <div class="header-actions">
-            <button class="btn btn-primary">➕ Add New Property</button>
-            <button class="btn btn-secondary">📊 Export Data</button>
-        </div>
-    </div>
+{{template "base.html" .}}
 
-    <!-- Filters -->
-    <div class="filters">
-        <div class="filter-group">
-            <select class="form-control">
-                <option>All Status</option>
-                <option>Occupied</option>
-                <option>Vacant</option>
-                <option>Maintenance</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <input type="text" class="form-control" placeholder="Search by address...">
-        </div>
-        <div class="filter-group">
-            <select class="form-control">
-                <option>All Bedrooms</option>
-                <option>1 Bedroom</option>
-                <option>2 Bedrooms</option>
-                <option>3+ Bedrooms</option>
-            </select>
-        </div>
+{{block "content" .}}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">All Properties</h2>
+        <button id="addPropertyBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Add New Property
+        </button>
     </div>
-
-    <!-- Properties Table -->
-    <div class="properties-table">
-        <sl-card style="margin-top:1rem">
-        <table class="table">
-            <thead>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th>Address</th>
-                    <th>Rent</th>
-                    <th>Status</th>
-                    <th>Bedrooms</th>
-                    <th>Bathrooms</th>
-                    <th>Sq Ft</th>
-                    <th>Tenant</th>
-                    <th>Actions</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Address</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Status</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Rent</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Tenant</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="text-gray-700">
                 {{range .Properties}}
                 <tr>
-                    <td>
-                        <div class="property-info">
-                            <strong>{{.Address}}</strong>
-                        </div>
+                    <td class="text-left py-3 px-4">{{.Address}}</td>
+                    <td class="text-left py-3 px-4">
+                        <span class="px-2 py-1 font-semibold leading-tight 
+                            {{if eq .Status "Occupied"}} text-green-700 bg-green-100 
+                            {{else if eq .Status "Vacant"}} text-yellow-700 bg-yellow-100
+                            {{else}} text-red-700 bg-red-100 {{end}} rounded-sm">
+                            {{.Status}}
+                        </span>
                     </td>
-                    <td class="rent">${{.Rent}}/mo</td>
-                    <td>
-                        <span class="status status-{{.Status}}">{{.Status}}</span>
-                    </td>
-                    <td>{{.Bedrooms}}</td>
-                    <td>{{.Bathrooms}}</td>
-                    <td>{{.SquareFeet}}</td>
-                    <td>
-                        {{if .Tenant}}
-                            <span class="tenant-name">{{.Tenant}}</span>
-                        {{else}}
-                            <em class="no-tenant">No Tenant</em>
-                        {{end}}
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <a href="/properties/{{.ID}}" class="btn btn-small btn-primary">View</a>
-                            <button class="btn btn-small btn-secondary">Edit</button>
-                            <button class="btn btn-small btn-danger">Delete</button>
-                        </div>
+                    <td class="text-left py-3 px-4">${{.Rent}}</td>
+                    <td class="text-left py-3 px-4">{{.Tenant}}</td>
+                    <td class="text-left py-3 px-4">
+                        <a href="/properties/{{.ID}}" class="text-blue-500 hover:underline">Details</a>
                     </td>
                 </tr>
                 {{end}}
             </tbody>
         </table>
-        </sl-card>
     </div>
+</div>
 
-    <!-- Pagination -->
-    <div class="pagination">
-        <button class="btn btn-secondary" disabled>« Previous</button>
-        <span class="page-info">Page 1 of 1</span>
-        <button class="btn btn-secondary" disabled>Next »</button>
+<!-- Add Property Modal -->
+<div id="addPropertyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4">Add New Property</h2>
+        <form id="addPropertyForm">
+            <div class="mb-4">
+                <label for="address" class="block text-gray-700 text-sm font-bold mb-2">Address</label>
+                <input type="text" id="address" name="address" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-4">
+                <label for="rent" class="block text-gray-700 text-sm font-bold mb-2">Monthly Rent</label>
+                <input type="number" id="rent" name="rent" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-6">
+                <label for="status" class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                <select id="status" name="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option>Vacant</option>
+                    <option>Occupied</option>
+                    <option>Maintenance</option>
+                </select>
+            </div>
+            <div class="flex items-center justify-end">
+                <button id="cancelBtn" type="button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Save Property
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {{end}}
+
+

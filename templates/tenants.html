@@ -1,248 +1,36 @@
-{{define "content"}}
-<div class="tenants-page">
-    <div class="page-header">
-        <div class="header-actions">
-            <button class="btn btn-primary">👤 Add New Tenant</button>
-            <button class="btn btn-secondary">📋 Generate Lease</button>
-            <button class="btn btn-secondary">📊 Export Data</button>
-        </div>
-    </div>
+{{template "base.html" .}}
 
-    <!-- Tenant Overview Stats -->
-    <div class="tenant-stats">
-        <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-content">
-                <h3>{{len .Properties | printf "%d"}}</h3>
-                <p>Total Tenants</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-content">
-                <h3>2</h3>
-                <p>Active Leases</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">⏰</div>
-            <div class="stat-content">
-                <h3>1</h3>
-                <p>Lease Expiring Soon</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">💰</div>
-            <div class="stat-content">
-                <h3>$5,300</h3>
-                <p>Monthly Rent Revenue</p>
-            </div>
-        </div>
+{{block "content" .}}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Tenant Management</h2>
+         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Add New Tenant
+        </button>
     </div>
-
-    <!-- Filters -->
-    <div class="filters">
-        <div class="filter-group">
-            <select class="form-control">
-                <option>All Tenants</option>
-                <option>Active Leases</option>
-                <option>Expiring Soon</option>
-                <option>No Lease</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <input type="text" class="form-control" placeholder="Search by tenant name...">
-        </div>
-    </div>
-
-    <!-- Tenants Table -->
-    <div class="tenants-table">
-        <table class="table">
-            <thead>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th>Tenant Name</th>
-                    <th>Property Address</th>
-                    <th>Monthly Rent</th>
-                    <th>Lease Start</th>
-                    <th>Lease End</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Tenant Name</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Property</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="text-gray-700">
                 {{range .Properties}}
-                {{if .Tenant}}
-                <tr>
-                    <td>
-                        <div class="tenant-info">
-                            <strong>{{.Tenant}}</strong>
-                            <br>
-                            <small class="text-muted">ID: T{{.ID}}001</small>
-                        </div>
-                    </td>
-                    <td>{{.Address}}</td>
-                    <td class="rent">${{.Rent}}/mo</td>
-                    <td>Jan 1, 2024</td>
-                    <td>
-                        <span class="lease-end">Dec 31, 2024</span>
-                        <br>
-                        <small class="text-warning">Expires in 4 months</small>
-                    </td>
-                    <td>(555) 123-4567</td>
-                    <td>
-                        <span class="status status-{{.Status}}">{{.Status}}</span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-small btn-primary">Contact</button>
-                            <button class="btn btn-small btn-secondary">Lease</button>
-                            <button class="btn btn-small btn-warning">Notice</button>
-                        </div>
-                    </td>
-                </tr>
-                {{end}}
-                {{end}}
-                <!-- Add vacant properties as potential tenant opportunities -->
-                {{range .Properties}}
-                {{if not .Tenant}}
-                <tr class="vacant-row">
-                    <td>
-                        <div class="tenant-info">
-                            <em class="text-muted">No Tenant</em>
-                            <br>
-                            <small class="text-muted">Vacant Unit</small>
-                        </div>
-                    </td>
-                    <td>{{.Address}}</td>
-                    <td class="rent">${{.Rent}}/mo</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>
-                        <span class="status status-vacant">{{.Status}}</span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-small btn-primary">Find Tenant</button>
-                            <button class="btn btn-small btn-secondary">Show Unit</button>
-                        </div>
-                    </td>
-                </tr>
-                {{end}}
+                    {{if .Tenant}}
+                    <tr>
+                        <td class="text-left py-3 px-4">{{.Tenant}}</td>
+                        <td class="text-left py-3 px-4">{{.Address}}</td>
+                        <td class="text-left py-3 px-4">
+                            <a href="#" class="text-blue-500 hover:underline">View Details</a>
+                        </td>
+                    </tr>
+                    {{end}}
                 {{end}}
             </tbody>
         </table>
     </div>
-
-    <!-- Recent Tenant Activities -->
-    <div class="recent-activities">
-        <h2>Recent Tenant Activities</h2>
-        <div class="activity-list">
-            <div class="activity-item">
-                <div class="activity-icon">💰</div>
-                <div class="activity-content">
-                    <strong>John Smith</strong> paid rent for 123 Main St
-                    <br>
-                    <small class="text-muted">2 days ago</small>
-                </div>
-                <div class="activity-amount">+$2,500</div>
-            </div>
-            <div class="activity-item">
-                <div class="activity-icon">📋</div>
-                <div class="activity-content">
-                    <strong>Sarah Johnson</strong> submitted maintenance request
-                    <br>
-                    <small class="text-muted">1 week ago</small>
-                </div>
-                <div class="activity-status">
-                    <span class="status status-maintenance">Pending</span>
-                </div>
-            </div>
-            <div class="activity-item">
-                <div class="activity-icon">📄</div>
-                <div class="activity-content">
-                    <strong>Lease renewal</strong> sent to John Smith
-                    <br>
-                    <small class="text-muted">2 weeks ago</small>
-                </div>
-                <div class="activity-status">
-                    <span class="status status-occupied">Sent</span>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-
-<style>
-.tenant-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.vacant-row {
-    opacity: 0.7;
-}
-
-.lease-end {
-    font-weight: 500;
-}
-
-.text-warning {
-    color: var(--warning-color);
-}
-
-.text-muted {
-    color: var(--text-secondary);
-}
-
-.recent-activities {
-    background: var(--card-background);
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    margin-top: 2rem;
-}
-
-.recent-activities h2 {
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-}
-
-.activity-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.activity-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-}
-
-.activity-icon {
-    font-size: 1.5rem;
-    width: 40px;
-    text-align: center;
-}
-
-.activity-content {
-    flex: 1;
-}
-
-.activity-amount {
-    font-weight: 600;
-    color: var(--success-color);
-}
-
-.activity-status {
-    margin-left: auto;
-}
-</style>
-{{ end }}
+{{end}}

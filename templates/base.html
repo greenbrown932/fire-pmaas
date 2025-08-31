@@ -1,155 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>{{.Title}} - PMaaS Platform</title>
-
-  <!-- Pico.css: modern, class-lite CSS framework -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
-
-  <!-- Shoelace: framework-agnostic Web Components -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.css" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
-
-  <!-- Chart.js for small KPI sparkline charts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
-  <!-- Your custom styles (kept, but we’ll extend) -->
-  <link rel="stylesheet" href="/static/css/style.css">
-  <style>
-    /* Layout container using CSS Grid for sidebar + main */
-    body { min-height: 100vh; }
-    .shell {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      min-height: 100vh;
-    }
-    @media (max-width: 960px) {
-      .shell { grid-template-columns: 1fr; }
-      .sidebar-panel { display: none; }
-    }
-
-    /* Sidebar using Shoelace card tone */
-    .sidebar-panel {
-      background: var(--sl-color-neutral-900);
-      border-right: 1px solid var(--sl-color-neutral-700);
-    }
-    .brand {
-      display:flex; align-items:center; gap:.6rem; padding:1rem 1.25rem;
-      border-bottom: 1px solid var(--sl-color-neutral-700);
-    }
-    .brand h2 { margin:0; letter-spacing:-.01em; }
-
-    .nav {
-      display:flex; flex-direction:column; padding:.5rem;
-      gap:.25rem;
-    }
-    .nav a {
-      display:flex; align-items:center; gap:.6rem;
-      padding:.7rem .9rem; border-radius: .6rem; color: var(--sl-color-neutral-200);
-      text-decoration:none;
-    }
-    .nav a:hover, .nav a[aria-current="page"] {
-      background: var(--sl-color-neutral-800);
-      color: var(--sl-color-neutral-0);
-    }
-
-    /* Header bar */
-    .appbar {
-      position: sticky; top:0; z-index:10;
-      display:flex; align-items:center; justify-content:space-between;
-      padding: .85rem 1.2rem;
-      background: color-mix(in oklab, var(--sl-color-neutral-900) 88%, transparent);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--sl-color-neutral-700);
-    }
-
-    /* Main content container */
-    .content { padding: 1.25rem; }
-    .page { max-width: 1280px; margin: 0 auto; }
-
-    /* Card grid helpers */
-    .kpi-grid {
-      display:grid; gap:1rem;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      margin-bottom: 1rem;
-    }
-
-    /* Shoelace cards harmonize with your classes */
-    sl-card {
-      --padding: 1rem;
-      border: 1px solid var(--sl-color-neutral-700);
-    }
-
-    .kpi {
-      display:grid; grid-template-columns: 56px 1fr; gap: .9rem; align-items:center;
-    }
-    .kpi-icon {
-      width:56px; height:56px; border-radius:14px; display:grid; place-items:center;
-      background: linear-gradient(135deg, #1a2f33 0%, #234b51 100%);
-      color: var(--sl-color-primary-300);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-      font-size: 1.3rem;
-    }
-    .kpi h3 { margin:0; font-size: 1.75rem; }
-    .kpi p  { margin:0; color: var(--sl-color-neutral-300); }
-
-    /* Quick actions */
-    .action-row { display:flex; flex-wrap:wrap; gap:.6rem; }
-
-    /* Tables inside sl-card */
-    .table { width:100%; border-collapse: collapse; }
-    .table th, .table td { padding:.75rem .85rem; border-top: 1px solid var(--sl-color-neutral-700); }
-    .table thead th { background: var(--sl-color-neutral-850); color: var(--sl-color-neutral-200); }
-
-    /* Keep your existing classes working */
-    .main-content { margin-left: 0; padding: 0; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Fire PMAAS</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-  <div class="shell">
-    <!-- Sidebar -->
-    <aside class="sidebar-panel">
-      <div class="brand">
-        <sl-icon name="building"></sl-icon>
-        <h2>PMaaS</h2>
-      </div>
-      <nav class="nav" aria-label="Main">
-        <a href="/" aria-current="page"><sl-icon name="house"></sl-icon> Dashboard</a>
-        <a href="/properties"><sl-icon name="building"></sl-icon> Properties</a>
-        <a href="/tenants"><sl-icon name="people"></sl-icon> Tenants</a>
-        <a href="/maintenance"><sl-icon name="wrench"></sl-icon> Maintenance</a>
-        <a href="#"><sl-icon name="card-text"></sl-icon> Payments</a>
-        <a href="#"><sl-icon name="graph-up"></sl-icon> Reports</a>
-      </nav>
-    </aside>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-    <!-- Main column -->
-    <div>
-      <!-- App bar -->
-      <div class="appbar">
-        <strong>{{.Title}}</strong>
-        <div style="display:flex;align-items:center;gap:.6rem">
-          <sl-avatar label="Admin" initials="AD" color="teal"></sl-avatar>
-          <sl-button size="small" variant="neutral" caret>Settings</sl-button>
+    <div class="flex h-screen bg-gray-200">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white flex flex-col">
+            <div class="text-white text-2xl font-semibold p-4 border-b border-gray-700">
+                Fire PMAAS
+            </div>
+            <nav class="flex-1 px-2 py-4 space-y-2">
+                <a href="/" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    Dashboard
+                </a>
+                <a href="/properties" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                   <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Properties
+                </a>
+                <a href="/tenants" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    Tenants
+                </a>
+                <a href="/maintenance" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 rounded-md">
+                   <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Maintenance
+                </a>
+            </nav>
         </div>
-      </div>
 
-      <!-- Content -->
-      <div class="content">
-        <div class="page">
-          {{block "content" .}}
-            <p>Content unavailable</p>
-          {{ end }}
+        <!-- Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="flex justify-between items-center p-4 bg-white border-b">
+                <h1 class="text-2xl font-semibold text-gray-800">{{.Title}}</h1>
+                <div class="flex items-center">
+                    <span class="text-gray-600 mr-2">Welcome, User!</span>
+                    <a href="/logout" class="text-blue-500 hover:text-blue-700">Logout</a>
+                </div>
+            </header>
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
+                <div class="container mx-auto px-6 py-8">
+                    {{block "content" .}}{{end}}
+                </div>
+            </main>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Your JS (enhanced) -->
-  <script src="/static/js/main.js"></script>
+    <script src="/static/js/main.js"></script>
 </body>
 </html>
+
 
