@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS maintenance_requests;
+DROP TABLE IF EXISTS payments;
+DROP TABLE IF EXISTS leases;
+DROP TABLE IF EXISTS tenants;
+DROP TABLE IF EXISTS property_units;
+DROP TABLE IF EXISTS properties;
