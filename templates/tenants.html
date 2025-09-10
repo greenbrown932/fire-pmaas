@@ -1,10 +1,10 @@
-{{template "base.html" .}}
-
-{{block "content" .}}
+{{template "base.html" .}} {{block "content" .}}
 <div class="bg-white p-6 rounded-lg shadow-md">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Tenant Management</h2>
-         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <button
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
             Add New Tenant
         </button>
     </div>
@@ -12,23 +12,35 @@
         <table class="min-w-full bg-white">
             <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Tenant Name</th>
-                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Property</th>
-                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Actions</th>
+                    <th
+                        class="text-left py-3 px-4 uppercase font-semibold text-sm"
+                    >
+                        Tenant Name
+                    </th>
+                    <th
+                        class="text-left py-3 px-4 uppercase font-semibold text-sm"
+                    >
+                        Property
+                    </th>
+                    <th
+                        class="text-left py-3 px-4 uppercase font-semibold text-sm"
+                    >
+                        Actions
+                    </th>
                 </tr>
             </thead>
             <tbody class="text-gray-700">
-                {{range .Properties}}
-                    {{if .Tenant}}
-                    <tr>
-                        <td class="text-left py-3 px-4">{{.Tenant}}</td>
-                        <td class="text-left py-3 px-4">{{.Address}}</td>
-                        <td class="text-left py-3 px-4">
-                            <a href="#" class="text-blue-500 hover:underline">View Details</a>
-                        </td>
-                    </tr>
-                    {{end}}
-                {{end}}
+                {{range .Properties}} {{if .TenantName}}
+                <tr>
+                    <td class="text-left py-3 px-4">{{.TenantName}}</td>
+                    <td class="text-left py-3 px-4">{{.Address}}</td>
+                    <td class="text-left py-3 px-4">
+                        <a href="#" class="text-blue-500 hover:underline"
+                            >View Details</a
+                        >
+                    </td>
+                </tr>
+                {{end}} {{end}}
             </tbody>
         </table>
     </div>

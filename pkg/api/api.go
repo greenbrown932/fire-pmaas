@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
@@ -26,6 +27,9 @@ func RegisterRoutes(r *chi.Mux) {
 		auth.Get("/", handleDashboard)
 		auth.Get("/properties", handleProperties)
 		auth.Get("/properties/{id}", handlePropertyDetail)
+		auth.Post("/properties", handleCreateProperty)
+		auth.Put("/properties/{id}", handleUpdateProperty)
+		auth.Delete("/properties/{id}", handleDeleteProperty)
 		auth.Get("/tenants", handleTenants)
 		auth.Get("/maintenance", handleMaintenance)
 
@@ -34,31 +38,36 @@ func RegisterRoutes(r *chi.Mux) {
 }
 
 func handleDashboard(w http.ResponseWriter, r *http.Request) {
+	properties, err := models.GetProperties()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	data := struct {
 		Title      string
-		Properties []models.Property
+		Properties []models.PropertyDetail
 		Stats      struct {
 			TotalProperties int
 			Occupied        int
 			Vacant          int
 			Maintenance     int
-			MonthlyRevenue  int
+			MonthlyRevenue  float64
 		}
 	}{
 		Title:      "Property Management Dashboard",
-		Properties: models.Properties,
+		Properties: properties,
 	}
 
 	// Calculate stats
-	for _, p := range models.Properties {
+	for _, p := range properties {
 		data.Stats.TotalProperties++
 		switch p.Status {
-		case "Occupied":
+		case "active":
 			data.Stats.Occupied++
 			data.Stats.MonthlyRevenue += p.Rent
-		case "Vacant":
+		case "ended":
 			data.Stats.Vacant++
-		case "Maintenance":
+		case "pending":
 			data.Stats.Maintenance++
 		}
 	}
@@ -67,35 +76,51 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleProperties(w http.ResponseWriter, r *http.Request) {
+	properties, err := models.GetProperties()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	data := struct {
 		Title      string
-		Properties []models.Property
+		Properties []models.PropertyDetail
 	}{
 		Title:      "All Properties",
-		Properties: models.Properties,
+		Properties: properties,
 	}
 	renderTemplate(w, "properties.html", data)
 }
 
 func handlePropertyDetail(w http.ResponseWriter, r *http.Request) {
-	// In a real app, you'd parse the ID and look up the property
+	// TODO: In a real app, you'd parse the ID and look up the property
+	properties, err := models.GetProperties()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	data := struct {
 		Title    string
-		Property models.Property
+		Property models.PropertyDetail
 	}{
 		Title:    "Property Details",
-		Property: models.Properties[0], // Mock - using first property
+		Property: properties[0], // Mock - using first property
 	}
+
 	renderTemplate(w, "property-detail.html", data)
 }
 
 func handleTenants(w http.ResponseWriter, r *http.Request) {
+	properties, err := models.GetProperties()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	data := struct {
 		Title      string
-		Properties []models.Property
+		Properties []models.PropertyDetail
 	}{
 		Title:      "Tenant Management",
-		Properties: models.Properties,
+		Properties: properties,
 	}
 	renderTemplate(w, "tenants.html", data)
 }
@@ -116,9 +141,24 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	err = t.Execute(w, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+}
+
+// The following handlers are placeholders.  Implement the logic to
+// create, update, and delete properties as needed.
+
+func handleCreateProperty(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Create Property endpoint")
+}
+
+func handleUpdateProperty(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Update Property endpoint")
+}
+
+func handleDeleteProperty(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Delete Property endpoint")
 }

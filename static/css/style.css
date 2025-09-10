@@ -1,6 +1,7 @@
-@import url('https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css');
+/* Import Tailwind CSS */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css");
 
+/* Apply Poppins font to the entire body */
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
 }
-

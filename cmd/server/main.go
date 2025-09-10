@@ -2,41 +2,41 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"time"
+	"log"      // For logging errors and other information
+	"net/http" // For creating HTTP servers
+	"os"       // For accessing environment variables
+	"time"     // For time-related operations, like sleeping
 
-	"github.com/go-chi/chi"
-	chimiddleware "github.com/go-chi/chi/middleware"
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/greenbrown932/fire-pmaas/pkg/api"
-	firemiddleware "github.com/greenbrown932/fire-pmaas/pkg/middleware"
+	// Third-party libraries
+	"github.com/go-chi/chi"                                             // Lightweight HTTP router
+	chimiddleware "github.com/go-chi/chi/middleware"                    // Useful middleware for Chi
+	"github.com/golang-migrate/migrate/v4"                              // Database migration tool
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"          // PostgreSQL driver for migrate
+	_ "github.com/golang-migrate/migrate/v4/source/file"                // File source driver for migrate
+	"github.com/greenbrown932/fire-pmaas/pkg/api"                       // API route definitions
+	"github.com/greenbrown932/fire-pmaas/pkg/db"                        // Database initialization and connection
+	firemiddleware "github.com/greenbrown932/fire-pmaas/pkg/middleware" // Custom middleware
 )
 
 func main() {
-	// --- Database Migration ---
 	runMigrations()
+	db.InitDB()
 
-	// --- Server Setup ---
-	r := chi.NewRouter()
-
-	// Middleware
-	r.Use(chimiddleware.Logger)
-	r.Use(chimiddleware.Recoverer)
-
+	// Initialize OIDC provider
 	if err := firemiddleware.InitOIDC(); err != nil {
 		log.Fatalf("Failed to initialize OIDC: %v", err)
 	}
 
+	r := chi.NewRouter()
+	r.Use(chimiddleware.Logger)    // Log API requests
+	r.Use(chimiddleware.Recoverer) // Recover from panics
+
 	api.RegisterRoutes(r)
 
-	log.Println("Starting server on port :8000")
 	if err := http.ListenAndServe(":8000", r); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
+
 }
 
 func runMigrations() {
@@ -61,7 +61,7 @@ func runMigrations() {
 	var err error
 
 	// Retry connecting to the database for migrations
-	for i := range 10 {
+	for i := 0; i < 10; i++ {
 		m, err = migrate.New(migrationsPath, databaseURL)
 		if err == nil {
 			break
