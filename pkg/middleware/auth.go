@@ -2,12 +2,16 @@ package middleware
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/greenbrown932/fire-pmaas/pkg/models"
 	"golang.org/x/oauth2"
 )
 
@@ -181,4 +185,219 @@ func HandleCallback(w http.ResponseWriter, r *http.Request) {
 	// Redirect to the home/dashboard (clear query params to avoid loops)
 	fmt.Println("Redirecting to /")
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+// ContextKey is a custom type for context keys to avoid collisions
+type ContextKey string
+
+const (
+	UserContextKey ContextKey = "user"
+)
+
+// GetUserFromContext retrieves the user from the request context
+func GetUserFromContext(ctx context.Context) (*models.User, bool) {
+	user, ok := ctx.Value(UserContextKey).(*models.User)
+	return user, ok
+}
+
+// RequirePermission is a middleware that checks if the user has the required permission
+func RequirePermission(permission string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user, ok := GetUserFromContext(r.Context())
+			if !ok {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			if !user.HasPermission(permission) {
+				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// RequireRole is a middleware that checks if the user has the required role
+func RequireRole(roleName string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user, ok := GetUserFromContext(r.Context())
+			if !ok {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			if !user.HasRole(roleName) {
+				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// RequireAnyRole is a middleware that checks if the user has any of the required roles
+func RequireAnyRole(roleNames ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user, ok := GetUserFromContext(r.Context())
+			if !ok {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			hasRole := false
+			for _, roleName := range roleNames {
+				if user.HasRole(roleName) {
+					hasRole = true
+					break
+				}
+			}
+
+			if !hasRole {
+				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// LoadUserFromToken is a middleware that loads user information from OIDC token
+func LoadUserFromToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Try to get user from ID token cookie
+		c, err := r.Cookie("id_token")
+		if err == nil && c.Value != "" {
+			// Verify the ID token
+			idToken, err := provider.Verifier(oidcConfig).Verify(r.Context(), c.Value)
+			if err == nil {
+				// Extract claims from the token
+				var claims struct {
+					Subject           string `json:"sub"`
+					Email             string `json:"email"`
+					EmailVerified     bool   `json:"email_verified"`
+					Name              string `json:"name"`
+					PreferredUsername string `json:"preferred_username"`
+					GivenName         string `json:"given_name"`
+					FamilyName        string `json:"family_name"`
+				}
+
+				if err := idToken.Claims(&claims); err == nil {
+					// Try to find existing user by Keycloak ID
+					user, err := models.GetUserByKeycloakID(claims.Subject)
+					if err != nil {
+						// User doesn't exist, create one
+						user = &models.User{
+							KeycloakID:    models.NullString(claims.Subject),
+							Username:      claims.PreferredUsername,
+							Email:         claims.Email,
+							FirstName:     claims.GivenName,
+							LastName:      claims.FamilyName,
+							EmailVerified: claims.EmailVerified,
+							Status:        "active",
+						}
+
+						// Create the user in the database
+						if err := models.CreateUser(user); err == nil {
+							// Assign default role to new users
+							defaultRole, err := models.GetRoleByName("tenant")
+							if err == nil {
+								models.AssignRole(user.ID, defaultRole.ID, nil)
+								// Reload user with roles
+								user, _ = models.GetUserByID(user.ID)
+							}
+						}
+					}
+
+					if user != nil {
+						// Add user to request context
+						ctx := context.WithValue(r.Context(), UserContextKey, user)
+						next.ServeHTTP(w, r.WithContext(ctx))
+						return
+					}
+				}
+			}
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// SessionAuth is a middleware for session-based authentication (alternative to OIDC)
+func SessionAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check for session token in cookie
+		sessionCookie, err := r.Cookie("session_token")
+		if err == nil && sessionCookie.Value != "" {
+			session, err := models.GetUserSession(sessionCookie.Value)
+			if err == nil {
+				user, err := models.GetUserByID(session.UserID)
+				if err == nil {
+					// Add user to request context
+					ctx := context.WithValue(r.Context(), UserContextKey, user)
+					next.ServeHTTP(w, r.WithContext(ctx))
+					return
+				}
+			}
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// GenerateSecureToken generates a cryptographically secure random token
+func GenerateSecureToken() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
+}
+
+// CreateUserSession creates a new session for a user
+func CreateUserSession(userID int, r *http.Request) (*models.UserSession, error) {
+	token, err := GenerateSecureToken()
+	if err != nil {
+		return nil, err
+	}
+
+	session := &models.UserSession{
+		UserID:       userID,
+		SessionToken: token,
+		IPAddress:    models.NullString(getClientIP(r)),
+		UserAgent:    models.NullString(r.UserAgent()),
+		ExpiresAt:    time.Now().Add(24 * time.Hour), // 24 hour session
+	}
+
+	err = models.CreateUserSession(session)
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}
+
+// getClientIP extracts the client IP address from the request
+func getClientIP(r *http.Request) string {
+	// Check X-Forwarded-For header first (for load balancers/proxies)
+	forwarded := r.Header.Get("X-Forwarded-For")
+	if forwarded != "" {
+		// X-Forwarded-For can contain multiple IPs, take the first one
+		return strings.Split(forwarded, ",")[0]
+	}
+
+	// Check X-Real-IP header
+	realIP := r.Header.Get("X-Real-IP")
+	if realIP != "" {
+		return realIP
+	}
+
+	// Fall back to RemoteAddr
+	return r.RemoteAddr
 }

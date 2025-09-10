@@ -1,0 +1,313 @@
+{{template "base.html" .}}
+
+{{block "content" .}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Profile Information -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Profile Information</h2>
+            <button id="editProfileBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Edit Profile
+            </button>
+        </div>
+
+        <div id="profileView">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                <p class="text-gray-900">{{.User.Username}}</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                <p class="text-gray-900">{{.User.Email}}</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                <p class="text-gray-900">{{.User.FirstName}}</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                <p class="text-gray-900">{{.User.LastName}}</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+                <p class="text-gray-900">{{if .User.PhoneNumber.Valid}}{{.User.PhoneNumber.String}}{{else}}Not provided{{end}}</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                <span class="px-2 py-1 font-semibold leading-tight
+                    {{if eq .User.Status "active"}} text-green-700 bg-green-100
+                    {{else}} text-red-700 bg-red-100 {{end}} rounded-sm">
+                    {{.User.Status}}
+                </span>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form (Hidden by default) -->
+        <div id="profileEdit" class="hidden">
+            <form id="profileForm">
+                <div class="mb-4">
+                    <label for="firstName" class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                    <input type="text" id="firstName" name="first_name" value="{{.User.FirstName}}"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div class="mb-4">
+                    <label for="lastName" class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                    <input type="text" id="lastName" name="last_name" value="{{.User.LastName}}"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div class="mb-4">
+                    <label for="phoneNumber" class="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+                    <input type="tel" id="phoneNumber" name="phone_number" value="{{if .User.PhoneNumber.Valid}}{{.User.PhoneNumber.String}}{{end}}"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div class="flex items-center justify-end">
+                    <button type="button" id="cancelEditBtn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">Security Settings</h2>
+
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <h3 class="font-semibold">Multi-Factor Authentication</h3>
+                    <p class="text-sm text-gray-600">Add an extra layer of security to your account</p>
+                </div>
+                <div class="flex items-center">
+                    <span class="mr-2 text-sm {{if .User.MFAEnabled}}text-green-600{{else}}text-gray-500{{end}}">
+                        {{if .User.MFAEnabled}}Enabled{{else}}Disabled{{end}}
+                    </span>
+                    {{if .User.MFAEnabled}}
+                        <button id="disableMfaBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm">
+                            Disable
+                        </button>
+                    {{else}}
+                        <button id="enableMfaBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-sm">
+                            Enable
+                        </button>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="font-semibold">Email Verification</h3>
+                    <p class="text-sm text-gray-600">Verify your email address</p>
+                </div>
+                <span class="px-2 py-1 font-semibold leading-tight text-sm
+                    {{if .User.EmailVerified}} text-green-700 bg-green-100
+                    {{else}} text-yellow-700 bg-yellow-100 {{end}} rounded-sm">
+                    {{if .User.EmailVerified}}Verified{{else}}Pending{{end}}
+                </span>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="font-semibold mb-2">Account Roles</h3>
+            <div class="space-y-1">
+                {{range .User.Roles}}
+                    <span class="inline-block px-2 py-1 text-sm font-semibold text-blue-700 bg-blue-100 rounded-sm">
+                        {{.DisplayName}}
+                    </span>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MFA Setup Modal -->
+<div id="mfaModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4">Setup Multi-Factor Authentication</h2>
+
+        <div id="mfaSetup" class="hidden">
+            <p class="mb-4">Scan this QR code with your authenticator app:</p>
+            <div id="qrCode" class="text-center mb-4"></div>
+            <p class="mb-4 text-sm text-gray-600">Or enter this secret manually:</p>
+            <div id="mfaSecret" class="bg-gray-100 p-2 rounded text-sm font-mono mb-4"></div>
+
+            <div class="mb-4">
+                <label for="mfaCode" class="block text-gray-700 text-sm font-bold mb-2">
+                    Enter the 6-digit code from your authenticator app
+                </label>
+                <input type="text" id="mfaCode" maxlength="6"
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+        </div>
+
+        <div id="mfaDisable" class="hidden">
+            <p class="mb-4">To disable MFA, enter the 6-digit code from your authenticator app:</p>
+            <div class="mb-4">
+                <input type="text" id="mfaDisableCode" maxlength="6"
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end">
+            <button id="mfaCancelBtn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">
+                Cancel
+            </button>
+            <button id="mfaConfirmBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const profileView = document.getElementById('profileView');
+    const profileEdit = document.getElementById('profileEdit');
+    const profileForm = document.getElementById('profileForm');
+
+    const enableMfaBtn = document.getElementById('enableMfaBtn');
+    const disableMfaBtn = document.getElementById('disableMfaBtn');
+    const mfaModal = document.getElementById('mfaModal');
+    const mfaCancelBtn = document.getElementById('mfaCancelBtn');
+    const mfaConfirmBtn = document.getElementById('mfaConfirmBtn');
+    const mfaSetup = document.getElementById('mfaSetup');
+    const mfaDisable = document.getElementById('mfaDisable');
+
+    let mfaAction = null;
+
+    // Profile editing
+    editProfileBtn?.addEventListener('click', () => {
+        profileView.classList.add('hidden');
+        profileEdit.classList.remove('hidden');
+    });
+
+    cancelEditBtn?.addEventListener('click', () => {
+        profileEdit.classList.add('hidden');
+        profileView.classList.remove('hidden');
+    });
+
+    profileForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(profileForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/users/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                location.reload(); // Reload to show updated data
+            } else {
+                alert('Failed to update profile');
+            }
+        } catch (error) {
+            alert('Error updating profile');
+        }
+    });
+
+    // MFA management
+    enableMfaBtn?.addEventListener('click', async () => {
+        mfaAction = 'enable';
+        try {
+            const response = await fetch('/api/users/mfa/enable', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('mfaSecret').textContent = data.secret;
+
+                // Generate QR code (you'd need a QR code library for this)
+                document.getElementById('qrCode').innerHTML = `<p>QR Code would be displayed here</p><p class="text-xs">QR URL: ${data.qr_url}</p>`;
+
+                mfaSetup.classList.remove('hidden');
+                mfaDisable.classList.add('hidden');
+                mfaModal.classList.remove('hidden');
+            } else {
+                alert('Failed to enable MFA');
+            }
+        } catch (error) {
+            alert('Error enabling MFA');
+        }
+    });
+
+    disableMfaBtn?.addEventListener('click', () => {
+        mfaAction = 'disable';
+        mfaSetup.classList.add('hidden');
+        mfaDisable.classList.remove('hidden');
+        mfaModal.classList.remove('hidden');
+    });
+
+    mfaCancelBtn?.addEventListener('click', () => {
+        mfaModal.classList.add('hidden');
+        mfaAction = null;
+    });
+
+    mfaConfirmBtn?.addEventListener('click', async () => {
+        const code = mfaAction === 'enable' ?
+            document.getElementById('mfaCode').value :
+            document.getElementById('mfaDisableCode').value;
+
+        if (!code || code.length !== 6) {
+            alert('Please enter a 6-digit code');
+            return;
+        }
+
+        try {
+            const endpoint = mfaAction === 'enable' ? '/api/users/mfa/verify' : '/api/users/mfa/disable';
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ mfa_code: code })
+            });
+
+            if (response.ok) {
+                if (mfaAction === 'enable') {
+                    const result = await response.json();
+                    if (result.valid) {
+                        alert('MFA enabled successfully!');
+                        location.reload();
+                    } else {
+                        alert('Invalid MFA code');
+                    }
+                } else {
+                    alert('MFA disabled successfully!');
+                    location.reload();
+                }
+            } else {
+                alert('Failed to ' + mfaAction + ' MFA');
+            }
+        } catch (error) {
+            alert('Error processing MFA request');
+        }
+
+        mfaModal.classList.add('hidden');
+        mfaAction = null;
+    });
+});
+</script>
+{{end}}

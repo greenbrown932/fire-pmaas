@@ -17,24 +17,57 @@ func RegisterRoutes(r *chi.Mux) {
 	filesDir := http.Dir(filepath.Join(workDir, "static"))
 	r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(filesDir)))
 
+	// Register user API routes (includes public and protected routes)
+	RegisterUserRoutes(r)
+
 	// API Routes
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
 	r.Get("/callback", middleware.HandleCallback)
+
+	// Web routes (protected by authentication)
 	r.Group(func(auth chi.Router) {
+		auth.Use(middleware.LoadUserFromToken)
 		auth.Use(middleware.RequireLogin)
+
+		// Dashboard and UI routes
 		auth.Get("/", handleDashboard)
-		auth.Get("/properties", handleProperties)
-		auth.Get("/properties/{id}", handlePropertyDetail)
-		auth.Post("/properties", handleCreateProperty)
-		auth.Put("/properties/{id}", handleUpdateProperty)
-		auth.Delete("/properties/{id}", handleDeleteProperty)
-		auth.Get("/tenants", handleTenants)
-		auth.Get("/maintenance", handleMaintenance)
+		auth.Get("/profile", handleProfilePage)
 
+		// Properties routes with role-based access
+		auth.Group(func(props chi.Router) {
+			props.Use(middleware.RequireAnyRole("admin", "property_manager", "viewer"))
+			props.Get("/properties", handleProperties)
+			props.Get("/properties/{id}", handlePropertyDetail)
+		})
+
+		// Property management routes (create, update, delete)
+		auth.Group(func(propsMgmt chi.Router) {
+			propsMgmt.Use(middleware.RequireAnyRole("admin", "property_manager"))
+			propsMgmt.Post("/properties", handleCreateProperty)
+			propsMgmt.Put("/properties/{id}", handleUpdateProperty)
+			propsMgmt.Delete("/properties/{id}", handleDeleteProperty)
+		})
+
+		// Tenant management routes
+		auth.Group(func(tenants chi.Router) {
+			tenants.Use(middleware.RequireAnyRole("admin", "property_manager", "viewer"))
+			tenants.Get("/tenants", handleTenants)
+		})
+
+		// Maintenance routes
+		auth.Group(func(maint chi.Router) {
+			maint.Use(middleware.RequireAnyRole("admin", "property_manager", "tenant"))
+			maint.Get("/maintenance", handleMaintenance)
+		})
+
+		// Admin routes
+		auth.Group(func(admin chi.Router) {
+			admin.Use(middleware.RequireAnyRole("admin", "property_manager"))
+			admin.Get("/admin/users", handleAdminUsersPage)
+		})
 	})
-
 }
 
 func handleDashboard(w http.ResponseWriter, r *http.Request) {
@@ -161,4 +194,32 @@ func handleUpdateProperty(w http.ResponseWriter, r *http.Request) {
 
 func handleDeleteProperty(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Delete Property endpoint")
+}
+
+func handleProfilePage(w http.ResponseWriter, r *http.Request) {
+	user, ok := middleware.GetUserFromContext(r.Context())
+	if !ok {
+		http.Error(w, "User not found in context", http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		Title string
+		User  *models.User
+	}{
+		Title: "User Profile",
+		User:  user,
+	}
+
+	renderTemplate(w, "profile.html", data)
+}
+
+func handleAdminUsersPage(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Title string
+	}{
+		Title: "User Management",
+	}
+
+	renderTemplate(w, "admin-users.html", data)
 }

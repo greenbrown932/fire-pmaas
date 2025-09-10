@@ -1,0 +1,370 @@
+{{template "base.html" .}}
+
+{{block "content" .}}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">User Management</h2>
+        <div class="space-x-2">
+            <button id="refreshUsersBtn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                Refresh
+            </button>
+            <button id="addUserBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Add New User
+            </button>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table id="usersTable" class="min-w-full bg-white">
+            <thead class="bg-gray-800 text-white">
+                <tr>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">ID</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Username</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Email</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Name</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Status</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">MFA</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Created</th>
+                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody" class="text-gray-700">
+                <!-- Users will be loaded via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div id="userModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl max-h-screen overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h2 id="userModalTitle" class="text-2xl font-bold">User Details</h2>
+            <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <form id="userForm">
+            <input type="hidden" id="userId" name="id">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                    <input type="text" id="username" name="username" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                    <input type="email" id="email" name="email" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="firstName" class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                    <input type="text" id="firstName" name="first_name" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div>
+                    <label for="lastName" class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                    <input type="text" id="lastName" name="last_name" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="phoneNumber" class="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+                    <input type="tel" id="phoneNumber" name="phone_number"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div>
+                    <label for="status" class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                    <select id="status" name="status" required
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="active">Active</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email Verified</label>
+                <label class="inline-flex items-center">
+                    <input type="checkbox" id="emailVerified" name="email_verified" class="form-checkbox">
+                    <span class="ml-2">Email is verified</span>
+                </label>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Roles</label>
+                <div id="rolesContainer" class="space-y-2">
+                    <!-- Roles will be loaded via JavaScript -->
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div>
+                    <button type="button" id="deleteUserBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded hidden">
+                        Delete User
+                    </button>
+                </div>
+                <div class="space-x-2">
+                    <button type="button" id="cancelUserBtn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Save User
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let users = [];
+    let roles = [];
+    let currentUser = null;
+
+    const usersTable = document.getElementById('usersTableBody');
+    const userModal = document.getElementById('userModal');
+    const userForm = document.getElementById('userForm');
+    const userModalTitle = document.getElementById('userModalTitle');
+    const deleteUserBtn = document.getElementById('deleteUserBtn');
+
+    // Load users and roles on page load
+    loadUsers();
+    loadRoles();
+
+    // Event listeners
+    document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
+    document.getElementById('addUserBtn').addEventListener('click', () => showUserModal());
+    document.getElementById('closeModalBtn').addEventListener('click', hideUserModal);
+    document.getElementById('cancelUserBtn').addEventListener('click', hideUserModal);
+    document.getElementById('deleteUserBtn').addEventListener('click', deleteUser);
+    userForm.addEventListener('submit', saveUser);
+
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/users');
+            if (response.ok) {
+                users = await response.json();
+                renderUsersTable();
+            } else {
+                alert('Failed to load users');
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+            alert('Error loading users');
+        }
+    }
+
+    async function loadRoles() {
+        try {
+            const response = await fetch('/api/roles');
+            if (response.ok) {
+                roles = await response.json();
+            } else {
+                console.error('Failed to load roles');
+            }
+        } catch (error) {
+            console.error('Error loading roles:', error);
+        }
+    }
+
+    function renderUsersTable() {
+        usersTable.innerHTML = '';
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="py-3 px-4">${user.id}</td>
+                <td class="py-3 px-4">${user.username}</td>
+                <td class="py-3 px-4">${user.email}</td>
+                <td class="py-3 px-4">${user.first_name} ${user.last_name}</td>
+                <td class="py-3 px-4">
+                    <span class="px-2 py-1 font-semibold leading-tight text-sm
+                        ${user.status === 'active' ? 'text-green-700 bg-green-100' :
+                          user.status === 'suspended' ? 'text-yellow-700 bg-yellow-100' :
+                          'text-red-700 bg-red-100'} rounded-sm">
+                        ${user.status}
+                    </span>
+                </td>
+                <td class="py-3 px-4">
+                    <span class="px-2 py-1 font-semibold leading-tight text-sm
+                        ${user.mfa_enabled ? 'text-green-700 bg-green-100' : 'text-gray-700 bg-gray-100'} rounded-sm">
+                        ${user.mfa_enabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                </td>
+                <td class="py-3 px-4">${new Date(user.created_at).toLocaleDateString()}</td>
+                <td class="py-3 px-4">
+                    <button onclick="showUserModal(${user.id})" class="text-blue-500 hover:text-blue-700 mr-2">
+                        Edit
+                    </button>
+                    <button onclick="viewUserDetails(${user.id})" class="text-green-500 hover:text-green-700">
+                        View
+                    </button>
+                </td>
+            `;
+            usersTable.appendChild(row);
+        });
+    }
+
+    async function showUserModal(userId = null) {
+        currentUser = userId;
+
+        if (userId) {
+            // Edit existing user
+            userModalTitle.textContent = 'Edit User';
+            deleteUserBtn.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/api/users/${userId}`);
+                if (response.ok) {
+                    const user = await response.json();
+                    populateUserForm(user);
+                } else {
+                    alert('Failed to load user details');
+                    return;
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                alert('Error loading user details');
+                return;
+            }
+        } else {
+            // Add new user
+            userModalTitle.textContent = 'Add New User';
+            deleteUserBtn.classList.add('hidden');
+            userForm.reset();
+        }
+
+        renderRolesCheckboxes();
+        userModal.classList.remove('hidden');
+    }
+
+    function populateUserForm(user) {
+        document.getElementById('userId').value = user.id;
+        document.getElementById('username').value = user.username;
+        document.getElementById('email').value = user.email;
+        document.getElementById('firstName').value = user.first_name;
+        document.getElementById('lastName').value = user.last_name;
+        document.getElementById('phoneNumber').value = user.phone_number || '';
+        document.getElementById('status').value = user.status;
+        document.getElementById('emailVerified').checked = user.email_verified;
+    }
+
+    function renderRolesCheckboxes() {
+        const container = document.getElementById('rolesContainer');
+        container.innerHTML = '';
+
+        roles.forEach(role => {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="roles" value="${role.id}" class="form-checkbox">
+                    <span class="ml-2">${role.display_name}</span>
+                    <span class="ml-1 text-sm text-gray-500">(${role.name})</span>
+                </label>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function hideUserModal() {
+        userModal.classList.add('hidden');
+        currentUser = null;
+    }
+
+    async function saveUser(e) {
+        e.preventDefault();
+
+        const formData = new FormData(userForm);
+        const userData = Object.fromEntries(formData.entries());
+
+        // Handle checkbox for email_verified
+        userData.email_verified = document.getElementById('emailVerified').checked;
+
+        try {
+            let response;
+            if (currentUser) {
+                // Update existing user
+                response = await fetch(`/api/users/${currentUser}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+            } else {
+                // Create new user (would need to implement this endpoint)
+                response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+            }
+
+            if (response.ok) {
+                hideUserModal();
+                loadUsers(); // Reload the users table
+                alert(currentUser ? 'User updated successfully' : 'User created successfully');
+            } else {
+                const error = await response.text();
+                alert('Failed to save user: ' + error);
+            }
+        } catch (error) {
+            console.error('Error saving user:', error);
+            alert('Error saving user');
+        }
+    }
+
+    async function deleteUser() {
+        if (!currentUser) return;
+
+        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            try {
+                const response = await fetch(`/api/users/${currentUser}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    hideUserModal();
+                    loadUsers(); // Reload the users table
+                    alert('User deleted successfully');
+                } else {
+                    alert('Failed to delete user');
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Error deleting user');
+            }
+        }
+    }
+
+    // Global functions for inline onclick handlers
+    window.showUserModal = showUserModal;
+    window.viewUserDetails = function(userId) {
+        showUserModal(userId);
+        // Make form read-only for view mode
+        const formElements = userForm.querySelectorAll('input, select, textarea');
+        formElements.forEach(element => {
+            element.disabled = true;
+        });
+        document.querySelector('button[type="submit"]').style.display = 'none';
+        deleteUserBtn.style.display = 'none';
+    };
+});
+</script>
+{{end}}
