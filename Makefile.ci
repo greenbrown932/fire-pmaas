@@ -1,0 +1,79 @@
+# Fire PMAAS - CI/CD Friendly Makefile
+
+.PHONY: help test test-verbose test-coverage clean build run deps ci verify vet fmt-check format
+
+# Default target
+help: ## Show this help message
+	@echo "Fire PMAAS - CI/CD Commands"
+	@echo ""
+	@echo "Available targets:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
+
+# Dependencies
+deps: ## Download and verify dependencies
+	@echo "📦 Downloading dependencies..."
+	go mod download
+	go mod tidy
+
+verify: ## Verify dependencies
+	@echo "🔍 Verifying dependencies..."
+	go mod verify
+
+# Testing
+test: ## Run all tests
+	@echo "🧪 Running tests..."
+	go test ./...
+
+test-verbose: ## Run tests with verbose output
+	@echo "🧪 Running tests (verbose)..."
+	go test -v ./...
+
+test-coverage: ## Run tests with coverage
+	@echo "📊 Running tests with coverage..."
+	go test -coverprofile=coverage.out ./...
+	go tool cover -func=coverage.out | tail -1
+
+# Quality checks
+vet: ## Run go vet
+	@echo "🔍 Running go vet..."
+	go vet ./...
+
+fmt-check: ## Check code formatting
+	@echo "📐 Checking code formatting..."
+	@if [ "$$(gofmt -s -l . | wc -l)" -gt 0 ]; then \
+		echo "❌ Code is not properly formatted:"; \
+		gofmt -s -l .; \
+		exit 1; \
+	else \
+		echo "✅ Code formatting is correct"; \
+	fi
+
+format: ## Format code
+	@echo "📐 Formatting code..."
+	go fmt ./...
+
+# Build
+build: ## Build the application
+	@echo "🔨 Building application..."
+	mkdir -p bin
+	go build -o bin/fire-pmaas ./cmd/server
+	@echo "✅ Build completed: bin/fire-pmaas"
+
+run: ## Run the application
+	@echo "🚀 Running application..."
+	go run ./cmd/server/main.go
+
+# Clean
+clean: ## Clean build artifacts
+	@echo "🧹 Cleaning build artifacts..."
+	rm -rf bin/ coverage.out coverage.html
+
+# CI pipeline
+ci: deps verify vet fmt-check test build ## Run full CI pipeline
+	@echo ""
+	@echo "🎉 All CI checks passed!"
+	@echo "✅ Dependencies verified"
+	@echo "✅ Code vetted"
+	@echo "✅ Formatting checked"
+	@echo "✅ Tests passed"
+	@echo "✅ Build successful"
