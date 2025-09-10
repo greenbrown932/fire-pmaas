@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -59,6 +60,21 @@ func InitOIDC() error {
 	return nil
 }
 
+// generateCodeVerifier generates a cryptographically random code verifier for PKCE
+func generateCodeVerifier() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(bytes), nil
+}
+
+// generateCodeChallenge creates a code challenge from the verifier using SHA256
+func generateCodeChallenge(verifier string) string {
+	hash := sha256.Sum256([]byte(verifier))
+	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(hash[:])
+}
+
 // RequireLogin is a middleware that protects routes and enforces login via Keycloak OIDC.
 func RequireLogin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -85,12 +101,31 @@ func RequireLogin(next http.Handler) http.Handler {
 		// For production, store it server-side (session) and check on callback.
 		state := fmt.Sprintf("%d", time.Now().UnixNano())
 
-		// Build the authorization URL from discovery (authorization_endpoint)
-		// via oauth2Config, ensuring it matches the provider's issuer.
-		// Scopes were set in oauth2Config; add any extras as needed.
+		// Generate PKCE parameters
+		codeVerifier, err := generateCodeVerifier()
+		if err != nil {
+			http.Error(w, "Failed to generate code verifier", http.StatusInternalServerError)
+			return
+		}
+		codeChallenge := generateCodeChallenge(codeVerifier)
+
+		// Store the code verifier in a cookie for the callback
+		http.SetCookie(w, &http.Cookie{
+			Name:     "code_verifier",
+			Value:    codeVerifier,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   false, // Set to true in production with HTTPS
+			SameSite: http.SameSiteLaxMode,
+			MaxAge:   600, // 10 minutes
+		})
+
+		// Build the authorization URL with PKCE parameters
 		authURL := oauth2Config.AuthCodeURL(
 			state,
 			oauth2.SetAuthURLParam("response_type", "code"),
+			oauth2.SetAuthURLParam("code_challenge", codeChallenge),
+			oauth2.SetAuthURLParam("code_challenge_method", "S256"),
 		)
 
 		// Redirect to the authorization URL
@@ -110,12 +145,28 @@ func HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Do the OAuth2 code-for-token exchange
-	token, err := oauth2Config.Exchange(ctx, code)
+	// Get the code verifier from the cookie
+	codeVerifierCookie, err := r.Cookie("code_verifier")
+	if err != nil {
+		http.Error(w, "Missing code verifier cookie", http.StatusBadRequest)
+		return
+	}
+	codeVerifier := codeVerifierCookie.Value
+
+	// Do the OAuth2 code-for-token exchange with PKCE
+	token, err := oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
 	if err != nil {
 		http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Clear the code verifier cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:   "code_verifier",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1, // Delete the cookie
+	})
 
 	// Extract and verify the ID token
 	rawIDToken, ok := token.Extra("id_token").(string)

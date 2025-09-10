@@ -1,0 +1,32 @@
+FROM golang:1.24.6-alpine AS test
+
+# Install necessary packages for testing
+RUN apk add --no-cache git make gcc musl-dev
+
+# Set working directory
+WORKDIR /app
+
+# Copy go mod files first for better caching
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Install test dependencies and tools
+RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+RUN go install golang.org/x/tools/cmd/goimports@latest
+
+# Set environment variables for testing
+ENV POSTGRES_HOST=localhost
+ENV POSTGRES_PORT=5432
+ENV POSTGRES_USER=test_user
+ENV POSTGRES_PASSWORD=test_pass
+ENV POSTGRES_DB=test_db
+ENV KEYCLOAK_ISSUER=http://localhost:8080/realms/test
+ENV CGO_ENABLED=1
+
+# Run tests
+CMD ["make", "ci-test"]

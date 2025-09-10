@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: test_db
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+
+  keycloak-test:
+    image: quay.io/keycloak/keycloak:22.0
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-test:5432/test_db
+      KC_DB_USERNAME: test_user
+      KC_DB_PASSWORD: test_pass
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    command: start-dev
+
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      POSTGRES_HOST: postgres-test
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: test_db
+      KEYCLOAK_ISSUER: http://keycloak-test:8080/realms/test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    volumes:
+      - ./coverage.out:/app/coverage.out
+      - ./coverage.html:/app/coverage.html
+
+volumes:
+  postgres_test_data:
