@@ -1,0 +1,60 @@
+run:
+  timeout: 5m
+  tests: true
+  skip-dirs:
+    - vendor
+  skip-files:
+    - ".*_test.go"
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: github.com/greenbrown932/fire-pmaas
+  misspell:
+    locale: US
+  unused:
+    check-exported: false
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - gofmt
+    - goimports
+    - misspell
+  disable:
+    - deadcode
+    - varcheck
+    - structcheck
+    - maligned
+    - golint
+    - interfacer
+    - scopelint
+  fast: true
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+    # Exclude known linter issues
+    - text: "weak cryptographic primitive"
+      linters:
+        - gosec
+    - text: "should not use dot imports"
+      linters:
+        - revive
+  max-issues-per-linter: 0
+  max-same-issues: 0
