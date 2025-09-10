@@ -1,0 +1,40 @@
+# Simple Makefile for Fire PMAAS
+
+.PHONY: help test test-verbose clean build run deps
+
+# Default target
+help: ## Show this help message
+	@echo "Fire PMAAS - Simple Commands"
+	@echo ""
+	@echo "Available targets:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
+
+# Dependencies
+deps: ## Download dependencies
+	go mod download
+	go mod tidy
+
+# Testing
+test: ## Run all tests
+	go test ./...
+
+test-verbose: ## Run tests with verbose output
+	go test -v ./...
+
+test-coverage: ## Run tests with coverage
+	go test -cover ./...
+
+# Build
+build: ## Build the application
+	go build -o bin/fire-pmaas ./cmd/server
+
+run: ## Run the application
+	go run ./cmd/server/main.go
+
+# Clean
+clean: ## Clean build artifacts
+	rm -rf bin/
+
+# Format
+format: ## Format code
+	go fmt ./...
