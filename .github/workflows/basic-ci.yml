@@ -2,9 +2,9 @@ name: Basic CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test-and-build:
@@ -12,80 +12,80 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24.6'
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.6"
 
-    - name: Cache Go modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - name: Download dependencies
-      run: go mod download
+      - name: Download dependencies
+        run: go mod download
 
-    - name: Verify dependencies
-      run: go mod verify
+      - name: Verify dependencies
+        run: go mod verify
 
-    - name: Run go vet
-      run: go vet ./...
+      - name: Run go vet
+        run: go vet ./...
 
-    - name: Check formatting
-      run: |
-        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-          echo "❌ Code is not properly formatted. Please run 'go fmt ./...'"
-          gofmt -s -l .
-          exit 1
-        else
-          echo "✅ Code formatting is correct"
-        fi
+      - name: Check formatting
+        run: |
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            echo "❌ Code is not properly formatted. Please run 'go fmt ./...'"
+            gofmt -s -l .
+            exit 1
+          else
+            echo "✅ Code formatting is correct"
+          fi
 
-    - name: Run tests
-      run: |
-        echo "🧪 Running tests..."
-        go test -v ./...
+      - name: Run tests
+        run: |
+          echo "🧪 Running tests..."
+          go test -v ./...
 
-    - name: Run tests with coverage
-      run: |
-        echo "📊 Generating coverage report..."
-        go test -coverprofile=coverage.out ./...
-        go tool cover -func=coverage.out | tail -1
+      - name: Run tests with coverage
+        run: |
+          echo "📊 Generating coverage report..."
+          go test -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out | tail -1
 
-    - name: Build application
-      run: |
-        echo "🔨 Building application..."
-        go build -v -o bin/fire-pmaas ./cmd/server
-        echo "✅ Build completed successfully"
+      - name: Build application
+        run: |
+          echo "🔨 Building application..."
+          go build -v -o bin/fire-pmaas ./cmd/server
+          echo "✅ Build completed successfully"
 
-    - name: Test binary
-      run: |
-        echo "🔍 Testing binary..."
-        ./bin/fire-pmaas --help || echo "Binary created successfully"
+      - name: Test binary
+        run: |
+          echo "🔍 Testing binary..."
+          ./bin/fire-pmaas --help || echo "Binary created successfully"
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage.out
-        retention-days: 7
-      continue-on-error: true
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.out
+          retention-days: 7
+        continue-on-error: true
 
-    - name: Upload binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: fire-pmaas-binary
-        path: bin/fire-pmaas
-        retention-days: 7
-      continue-on-error: true
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: fire-pmaas-binary
+          path: bin/fire-pmaas
+          retention-days: 7
+        continue-on-error: true
 
   quality-check:
     name: Code Quality
@@ -93,28 +93,28 @@ jobs:
     continue-on-error: true
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24.6'
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.6"
 
-    - name: Download dependencies
-      run: go mod download
+      - name: Download dependencies
+        run: go mod download
 
-    - name: Install tools
-      run: |
-        go install honnef.co/go/tools/cmd/staticcheck@latest
-        go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+      - name: Install tools
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+          go install github.com/securecodewarrior/gosec/cmd/gosec@latest
 
-    - name: Run static analysis
-      run: |
-        echo "🔍 Running static analysis..."
-        staticcheck ./... || echo "Static analysis completed with warnings"
+      - name: Run static analysis
+        run: |
+          echo "🔍 Running static analysis..."
+          staticcheck ./... || echo "Static analysis completed with warnings"
 
-    - name: Run security scan
-      run: |
-        echo "🔒 Running security scan..."
-        gosec ./... || echo "Security scan completed with warnings"
+      - name: Run security scan
+        run: |
+          echo "🔒 Running security scan..."
+          gosec ./... || echo "Security scan completed with warnings"

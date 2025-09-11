@@ -103,9 +103,12 @@ func handleUserRegistration(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Assign default role
-	defaultRole, err := models.GetRoleByName("tenant")
-	if err == nil {
-		models.AssignRole(user.ID, defaultRole.ID, nil)
+	defaultRole, roleErr := models.GetRoleByName("tenant")
+	if roleErr == nil {
+		if assignErr := models.AssignRole(user.ID, defaultRole.ID, nil); assignErr != nil {
+			// Log error but don't fail user creation
+			// In production, you'd want proper logging here
+		}
 	}
 
 	// Return user info (without sensitive data)
@@ -120,7 +123,10 @@ func handleUserRegistration(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // User Login Handler (session-based)
@@ -145,7 +151,10 @@ func handleGetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Update User Profile Handler
@@ -184,7 +193,10 @@ func handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Logout Handler
@@ -192,7 +204,9 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 	// Delete session cookie if present
 	sessionCookie, err := r.Cookie("session_token")
 	if err == nil && sessionCookie.Value != "" {
-		models.DeleteUserSession(sessionCookie.Value)
+		if delErr := models.DeleteUserSession(sessionCookie.Value); delErr != nil {
+			// Log error but continue with logout
+		}
 	}
 
 	// Delete ID token cookie
@@ -218,7 +232,10 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Logged out successfully"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "Logged out successfully"}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Enable MFA Handler
@@ -256,7 +273,10 @@ func handleEnableMFA(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Disable MFA Handler
@@ -296,7 +316,10 @@ func handleDisableMFA(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "MFA disabled successfully"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "MFA disabled successfully"}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Verify MFA Handler
@@ -328,7 +351,10 @@ func handleVerifyMFA(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Password Reset Request Handler
@@ -346,7 +372,10 @@ func handlePasswordResetRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Don't reveal if user exists or not for security
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"message": "If the email exists, a reset link has been sent"})
+		if err := json.NewEncoder(w).Encode(map[string]string{"message": "If the email exists, a reset link has been sent"}); err != nil {
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -370,7 +399,10 @@ func handlePasswordResetRequest(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Password reset token for %s: %s\n", user.Email, token)
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "If the email exists, a reset link has been sent"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "If the email exists, a reset link has been sent"}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Password Reset Confirm Handler
@@ -453,7 +485,10 @@ func handleListUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	if err := json.NewEncoder(w).Encode(users); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Get User Handler (Admin only)
@@ -475,7 +510,10 @@ func handleGetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Update User Handler (Admin only)
@@ -538,7 +576,10 @@ func handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Delete User Handler (Admin only)
@@ -587,7 +628,10 @@ func handleAssignRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Role assigned successfully"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "Role assigned successfully"}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Remove Role Handler (Admin only)
@@ -610,7 +654,10 @@ func handleRemoveRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Role removed successfully"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "Role removed successfully"}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Get Roles Handler (Admin only)
@@ -622,5 +669,8 @@ func handleGetRoles(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(roles)
+	if err := json.NewEncoder(w).Encode(roles); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

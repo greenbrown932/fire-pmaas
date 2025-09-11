@@ -22,7 +22,7 @@ func RegisterRoutes(r *chi.Mux) {
 
 	// API Routes
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 	r.Get("/callback", middleware.HandleCallback)
 

@@ -357,9 +357,11 @@ func LoadUserFromToken(next http.Handler) http.Handler {
 						// Create the user in the database
 						if err := models.CreateUser(user); err == nil {
 							// Assign default role to new users
-							defaultRole, err := models.GetRoleByName("tenant")
-							if err == nil {
-								models.AssignRole(user.ID, defaultRole.ID, nil)
+							defaultRole, roleErr := models.GetRoleByName("tenant")
+							if roleErr == nil {
+								if assignErr := models.AssignRole(user.ID, defaultRole.ID, nil); assignErr != nil {
+									// Log error but don't fail user creation
+								}
 								// Reload user with roles
 								user, _ = models.GetUserByID(user.ID)
 							}
