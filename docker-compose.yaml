@@ -1,0 +1,23 @@
+services:
+  fire-api:
+    build: .
+    container_name: ${API_NAME}
+    networks:
+      - fire-net
+    environment:
+      POSTGRES_HOST: ${POSTGRES_CONTAINER_NAME}
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+    ports:
+      - "${API_PORT}:8000"
+    depends_on:
+      - postgres
+      - keycloak
+    restart: unless-stopped
+
+networks:
+  fire-net:
+    external: true

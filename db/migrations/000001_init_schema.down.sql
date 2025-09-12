@@ -4,3 +4,5 @@ DROP TABLE IF EXISTS leases;
 DROP TABLE IF EXISTS tenants;
 DROP TABLE IF EXISTS property_units;
 DROP TABLE IF EXISTS properties;
+
+ALTER TABLE properties DROP COLUMN tags;

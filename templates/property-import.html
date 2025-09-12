@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Import Properties from CSV</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <h1>Import Properties from CSV</h1>
+    <form action="/properties/import" method="post" enctype="multipart/form-data">
+        <label for="csvFile">CSV File:</label><br>
+        <input type="file" id="csvFile" name="csvFile"><br><br>
+        <input type="submit" value="Upload">
+    </form>
+</body>
+</html>

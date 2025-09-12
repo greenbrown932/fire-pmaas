@@ -20,6 +20,7 @@ type Property struct {
 	Name         string
 	Address      string
 	PropertyType string
+	Tags         StringArray
 	CreatedAt    time.Time
 	UpdatedAt    time.Time // Time the property was last updated
 }
@@ -92,6 +93,18 @@ type User struct {
 	CreatedAt            time.Time      `json:"created_at"`
 	UpdatedAt            time.Time      `json:"updated_at"`
 	Roles                []Role         `json:"roles,omitempty"`
+}
+
+// HasAnyRole checks if user has any of the specified roles
+func (u *User) HasAnyRole(roleNames ...string) bool {
+	for _, userRole := range u.Roles {
+		for _, roleName := range roleNames {
+			if userRole.Name == roleName {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // Role represents a role in the system with associated permissions
@@ -215,6 +228,40 @@ func GetProperties() ([]PropertyDetail, error) {
 		LEFT JOIN leases l ON pu.id = l.unit_id AND l.status = 'active' -- Only active leases
 		LEFT JOIN tenants t ON l.tenant_id = t.id             -- Join with tenants table
 	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var properties []PropertyDetail
+	for rows.Next() {
+		var p PropertyDetail
+		if err := rows.Scan(&p.ID, &p.Address, &p.Rent, &p.Status, &p.Bedrooms, &p.Bathrooms, &p.TenantName); err != nil {
+			return nil, err
+		}
+		properties = append(properties, p)
+	}
+	return properties, nil
+}
+
+// GetPropertiesByTags retrieves a list of properties with details including address, rent, status, and tenant name, filtered by tags.
+func GetPropertiesByTags(tags []string) ([]PropertyDetail, error) {
+	// Execute the SQL query to retrieve property details.
+	rows, err := db.DB.Query(`
+		SELECT
+			p.id,                             -- Property ID
+			p.address,                        -- Property Address
+			COALESCE(l.monthly_rent, 0),      -- Lease Monthly Rent (default to 0 if NULL)
+			COALESCE(l.status, 'vacant'),     -- Lease Status (default to 'vacant' if NULL)
+			COALESCE(pu.bedrooms, 0),         -- Property Unit Bedrooms (default to 0 if NULL)
+			COALESCE(pu.bathrooms, 0),        -- Property Unit Bathrooms (default to 0 if NULL)
+			COALESCE(t.first_name || ' ' || t.last_name, '') AS tenant_name -- Tenant Full Name (empty if NULL)
+		FROM properties p                                     -- From the properties table
+		LEFT JOIN property_units pu ON p.id = pu.property_id   -- Join with property_units table
+		LEFT JOIN leases l ON pu.id = l.unit_id AND l.status = 'active' -- Only active leases
+		LEFT JOIN tenants t ON l.tenant_id = t.id             -- Join with tenants table
+		WHERE p.tags @> $1                                  -- Filter by tags
+	`, pq.Array(tags))
 	if err != nil {
 		return nil, err
 	}

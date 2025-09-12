@@ -1,0 +1,622 @@
+{{template "base.html" .}}
+
+{{block "content" .}}
+<div class="space-y-6">
+    <!-- Header Section with Actions -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
+                <p class="text-gray-600 mt-1">Generate customizable reports and analyze your property data</p>
+            </div>
+            <div class="flex space-x-3">
+                <button id="createReportBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Create Report
+                </button>
+                <button id="templatesBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Templates
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Reports Section -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Reports</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button class="quick-report-btn p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left"
+                    data-type="property" data-title="Property Overview">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-2 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="font-medium text-gray-900">Property Overview</p>
+                        <p class="text-sm text-gray-500">Occupancy & performance</p>
+                    </div>
+                </div>
+            </button>
+
+            <button class="quick-report-btn p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left"
+                    data-type="financial" data-title="Financial Summary">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-2 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="font-medium text-gray-900">Financial Summary</p>
+                        <p class="text-sm text-gray-500">Revenue & expenses</p>
+                    </div>
+                </div>
+            </button>
+
+            <button class="quick-report-btn p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left"
+                    data-type="tenant" data-title="Tenant Report">
+                <div class="flex items-center">
+                    <div class="bg-purple-100 p-2 rounded-lg">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="font-medium text-gray-900">Tenant Report</p>
+                        <p class="text-sm text-gray-500">Leases & demographics</p>
+                    </div>
+                </div>
+            </button>
+
+            <button class="quick-report-btn p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left"
+                    data-type="maintenance" data-title="Maintenance Report">
+                <div class="flex items-center">
+                    <div class="bg-orange-100 p-2 rounded-lg">
+                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="font-medium text-gray-900">Maintenance Report</p>
+                        <p class="text-sm text-gray-500">Requests & resolution</p>
+                    </div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Recent Reports and Report List -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Reports -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Recent Reports</h3>
+                <button id="refreshReportsBtn" class="text-blue-500 hover:text-blue-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="recentReportsList" class="space-y-3">
+                <!-- Recent reports will be loaded via JavaScript -->
+                <div class="text-center text-gray-500 py-4">
+                    <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Loading reports...
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Templates -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Report Templates</h3>
+                <span class="text-sm text-gray-500">Click to use</span>
+            </div>
+            <div id="reportTemplatesList" class="space-y-3">
+                <!-- Templates will be loaded via JavaScript -->
+                <div class="text-center text-gray-500 py-4">
+                    <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Loading templates...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Report Modal -->
+<div id="createReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-screen overflow-y-auto m-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Create Custom Report</h2>
+                <button id="closeCreateReportModal" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="createReportForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="reportName" class="block text-sm font-medium text-gray-700 mb-2">Report Name</label>
+                        <input type="text" id="reportName" name="name" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="reportType" class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+                        <select id="reportType" name="report_type" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select type...</option>
+                            <option value="property">Property</option>
+                            <option value="financial">Financial</option>
+                            <option value="tenant">Tenant</option>
+                            <option value="maintenance">Maintenance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="reportDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="reportDescription" name="description" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Report Columns</label>
+                    <div id="reportColumns" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <!-- Columns will be populated based on report type -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="isPublic" name="is_public" class="mr-2">
+                            <span class="text-sm text-gray-700">Make this report public</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="includeChart" name="include_chart" class="mr-2">
+                            <span class="text-sm text-gray-700">Include charts</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-6 border-t">
+                    <button type="button" id="cancelCreateReport" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        Create Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Report Templates Modal -->
+<div id="templatesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto m-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Report Templates</h2>
+                <button id="closeTemplatesModal" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="templatesGrid">
+                <!-- Templates will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let reports = [];
+    let templates = [];
+
+    // Load initial data
+    loadReports();
+    loadTemplates();
+
+    // Event listeners
+    document.getElementById('createReportBtn').addEventListener('click', () => {
+        document.getElementById('createReportModal').classList.remove('hidden');
+    });
+
+    document.getElementById('templatesBtn').addEventListener('click', () => {
+        document.getElementById('templatesModal').classList.remove('hidden');
+    });
+
+    document.getElementById('closeCreateReportModal').addEventListener('click', () => {
+        document.getElementById('createReportModal').classList.add('hidden');
+    });
+
+    document.getElementById('closeTemplatesModal').addEventListener('click', () => {
+        document.getElementById('templatesModal').classList.add('hidden');
+    });
+
+    document.getElementById('cancelCreateReport').addEventListener('click', () => {
+        document.getElementById('createReportModal').classList.add('hidden');
+    });
+
+    document.getElementById('refreshReportsBtn').addEventListener('click', loadReports);
+
+    // Report type change handler
+    document.getElementById('reportType').addEventListener('change', function() {
+        updateReportColumns(this.value);
+    });
+
+    // Quick report buttons
+    document.querySelectorAll('.quick-report-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.dataset.type;
+            const title = this.dataset.title;
+            generateQuickReport(type, title);
+        });
+    });
+
+    // Create report form submission
+    document.getElementById('createReportForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await createReport();
+    });
+
+    async function loadReports() {
+        try {
+            const response = await fetch('/api/reports');
+            if (response.ok) {
+                reports = await response.json();
+                renderRecentReports();
+            } else {
+                showError('Failed to load reports');
+            }
+        } catch (error) {
+            console.error('Error loading reports:', error);
+            showError('Error loading reports');
+        }
+    }
+
+    async function loadTemplates() {
+        try {
+            const response = await fetch('/api/report-templates');
+            if (response.ok) {
+                templates = await response.json();
+                renderTemplates();
+            } else {
+                showError('Failed to load templates');
+            }
+        } catch (error) {
+            console.error('Error loading templates:', error);
+            showError('Error loading templates');
+        }
+    }
+
+    function renderRecentReports() {
+        const container = document.getElementById('recentReportsList');
+        container.innerHTML = '';
+
+        if (reports.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-gray-500 py-4">
+                    <p>No reports created yet</p>
+                    <p class="text-sm">Create your first report to get started</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Show last 5 reports
+        const recentReports = reports.slice(0, 5);
+        recentReports.forEach(report => {
+            const reportCard = document.createElement('div');
+            reportCard.className = 'border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer';
+            reportCard.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-medium text-gray-900">${report.name}</h4>
+                        <p class="text-sm text-gray-500">${report.report_type} • ${formatDate(report.updated_at)}</p>
+                        ${report.description ? `<p class="text-sm text-gray-600 mt-1">${report.description}</p>` : ''}
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="executeReport(${report.id})" class="text-blue-500 hover:text-blue-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-5 4h1m2 0h1m-4 4h6m2-4h2.586a1 1 0 001.414 0L16 10a1 1 0 00-1.414 0L9.586 15.414a1 1 0 000 1.414z"></path>
+                            </svg>
+                        </button>
+                        <button onclick="viewReport(${report.id})" class="text-green-500 hover:text-green-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(reportCard);
+        });
+    }
+
+    function renderTemplates() {
+        const container = document.getElementById('reportTemplatesList');
+        container.innerHTML = '';
+
+        if (templates.length === 0) {
+            container.innerHTML = '<div class="text-center text-gray-500 py-4">No templates available</div>';
+            return;
+        }
+
+        // Show first 3 templates in the side panel
+        const displayTemplates = templates.slice(0, 3);
+        displayTemplates.forEach(template => {
+            const templateCard = document.createElement('div');
+            templateCard.className = 'border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer';
+            templateCard.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h5 class="font-medium text-gray-900 text-sm">${template.name}</h5>
+                        <p class="text-xs text-gray-500">${template.category}</p>
+                    </div>
+                    <button onclick="useTemplate(${template.id})" class="text-blue-500 hover:text-blue-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            container.appendChild(templateCard);
+        });
+    }
+
+    function updateReportColumns(reportType) {
+        const columnsContainer = document.getElementById('reportColumns');
+        columnsContainer.innerHTML = '';
+
+        let columns = [];
+        switch (reportType) {
+            case 'property':
+                columns = ['ID', 'Name', 'Address', 'Type', 'Units', 'Occupied', 'Avg Rent', 'Maintenance Requests'];
+                break;
+            case 'financial':
+                columns = ['Month', 'Payment Count', 'Total Amount', 'Average Amount', 'Collection Rate'];
+                break;
+            case 'tenant':
+                columns = ['ID', 'First Name', 'Last Name', 'Email', 'Phone', 'Status', 'Property', 'Rent'];
+                break;
+            case 'maintenance':
+                columns = ['ID', 'Property', 'Description', 'Status', 'Priority', 'Reported Date', 'Resolution Days'];
+                break;
+        }
+
+        columns.forEach(column => {
+            const checkbox = document.createElement('label');
+            checkbox.className = 'flex items-center';
+            checkbox.innerHTML = `
+                <input type="checkbox" name="columns" value="${column}" class="mr-2" checked>
+                <span class="text-sm text-gray-700">${column}</span>
+            `;
+            columnsContainer.appendChild(checkbox);
+        });
+    }
+
+    async function createReport() {
+        const form = document.getElementById('createReportForm');
+        const formData = new FormData(form);
+
+        const reportData = {
+            name: formData.get('name'),
+            description: formData.get('description'),
+            report_type: formData.get('report_type'),
+            columns: Array.from(form.querySelectorAll('input[name="columns"]:checked')).map(cb => cb.value),
+            is_public: formData.get('is_public') === 'on',
+            criteria: {},
+            chart_config: formData.get('include_chart') === 'on' ? { enabled: true } : null
+        };
+
+        try {
+            const response = await fetch('/api/reports', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reportData)
+            });
+
+            if (response.ok) {
+                const newReport = await response.json();
+                showSuccess('Report created successfully!');
+                document.getElementById('createReportModal').classList.add('hidden');
+                loadReports(); // Refresh the reports list
+            } else {
+                const error = await response.text();
+                showError('Failed to create report: ' + error);
+            }
+        } catch (error) {
+            console.error('Error creating report:', error);
+            showError('Error creating report');
+        }
+    }
+
+    async function generateQuickReport(type, title) {
+        try {
+            showLoading('Generating ' + title + '...');
+
+            // Create a temporary report configuration for quick reports
+            const quickReportData = {
+                name: title + ' - ' + new Date().toLocaleDateString(),
+                report_type: type,
+                criteria: {},
+                columns: getDefaultColumnsForType(type),
+                is_public: false
+            };
+
+            const response = await fetch('/api/reports', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(quickReportData)
+            });
+
+            if (response.ok) {
+                const report = await response.json();
+                // Execute the report immediately
+                await executeReport(report.id);
+            } else {
+                showError('Failed to generate quick report');
+            }
+        } catch (error) {
+            console.error('Error generating quick report:', error);
+            showError('Error generating quick report');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function getDefaultColumnsForType(type) {
+        switch (type) {
+            case 'property':
+                return ['ID', 'Name', 'Address', 'Type', 'Units', 'Occupied', 'Avg Rent'];
+            case 'financial':
+                return ['Month', 'Payment Count', 'Total Amount', 'Average Amount'];
+            case 'tenant':
+                return ['ID', 'First Name', 'Last Name', 'Email', 'Status', 'Property'];
+            case 'maintenance':
+                return ['ID', 'Property', 'Description', 'Status', 'Priority', 'Reported Date'];
+            default:
+                return [];
+        }
+    }
+
+    // Global functions for button clicks
+    window.executeReport = async function(reportId) {
+        try {
+            showLoading('Executing report...');
+
+            const response = await fetch(`/api/reports/${reportId}/execute`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                displayReportResults(data);
+            } else {
+                showError('Failed to execute report');
+            }
+        } catch (error) {
+            console.error('Error executing report:', error);
+            showError('Error executing report');
+        } finally {
+            hideLoading();
+        }
+    };
+
+    window.viewReport = function(reportId) {
+        window.location.href = `/reports/${reportId}/view`;
+    };
+
+    window.useTemplate = async function(templateId) {
+        try {
+            const response = await fetch(`/api/reports/from-template/${templateId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: 'Report from Template - ' + new Date().toLocaleDateString()
+                })
+            });
+
+            if (response.ok) {
+                showSuccess('Report created from template!');
+                loadReports();
+                document.getElementById('templatesModal').classList.add('hidden');
+            } else {
+                showError('Failed to create report from template');
+            }
+        } catch (error) {
+            console.error('Error using template:', error);
+            showError('Error using template');
+        }
+    };
+
+    function displayReportResults(data) {
+        // Create a new window or redirect to view the report results
+        const resultsWindow = window.open('', '_blank');
+        resultsWindow.document.write(`
+            <html>
+                <head>
+                    <title>Report Results</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        table { border-collapse: collapse; width: 100%; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .summary { background-color: #f9f9f9; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Report Results</h1>
+                    ${data.summary ? `<div class="summary"><h3>Summary</h3><pre>${JSON.stringify(data.summary, null, 2)}</pre></div>` : ''}
+                    <table>
+                        <thead>
+                            <tr>${data.headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                        </thead>
+                        <tbody>
+                            ${data.rows.map(row => `<tr>${data.headers.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>`).join('')}
+                        </tbody>
+                    </table>
+                </body>
+            </html>
+        `);
+    }
+
+    // Utility functions
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString();
+    }
+
+    function showSuccess(message) {
+        // Simple success notification
+        alert('Success: ' + message);
+    }
+
+    function showError(message) {
+        // Simple error notification
+        alert('Error: ' + message);
+    }
+
+    function showLoading(message) {
+        // Simple loading indicator
+        console.log('Loading: ' + message);
+    }
+
+    function hideLoading() {
+        // Hide loading indicator
+        console.log('Loading complete');
+    }
+});
+</script>
+{{end}}

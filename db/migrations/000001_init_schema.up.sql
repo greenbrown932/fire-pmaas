@@ -8,6 +8,9 @@ CREATE TABLE properties (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE properties ADD COLUMN tags TEXT[];
+
+
 -- 2. Property Units Table: Represents individual units within a property.
 CREATE TABLE property_units (
     id SERIAL PRIMARY KEY,

@@ -297,23 +297,35 @@ func RequireAnyRole(roleNames ...string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			user, ok := GetUserFromContext(r.Context())
 			if !ok {
+				fmt.Printf("DEBUG: RequireAnyRole - No user in context for %s\n", r.URL.Path)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 
+			fmt.Printf("DEBUG: RequireAnyRole - User %s (ID: %d) accessing %s\n", user.Username, user.ID, r.URL.Path)
+			fmt.Printf("DEBUG: RequireAnyRole - Required roles: %v\n", roleNames)
+			fmt.Printf("DEBUG: RequireAnyRole - User has %d roles: ", len(user.Roles))
+			for _, role := range user.Roles {
+				fmt.Printf("%s ", role.Name)
+			}
+			fmt.Printf("\n")
+
 			hasRole := false
 			for _, roleName := range roleNames {
 				if user.HasRole(roleName) {
+					fmt.Printf("DEBUG: RequireAnyRole - User has required role: %s\n", roleName)
 					hasRole = true
 					break
 				}
 			}
 
 			if !hasRole {
+				fmt.Printf("DEBUG: RequireAnyRole - User does not have any required roles, denying access\n")
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return
 			}
 
+			fmt.Printf("DEBUG: RequireAnyRole - Access granted\n")
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -330,19 +342,38 @@ func LoadUserFromToken(next http.Handler) http.Handler {
 			if err == nil {
 				// Extract claims from the token
 				var claims struct {
-					Subject           string `json:"sub"`
-					Email             string `json:"email"`
-					EmailVerified     bool   `json:"email_verified"`
-					Name              string `json:"name"`
-					PreferredUsername string `json:"preferred_username"`
-					GivenName         string `json:"given_name"`
-					FamilyName        string `json:"family_name"`
+					Subject           string                 `json:"sub"`
+					Email             string                 `json:"email"`
+					EmailVerified     bool                   `json:"email_verified"`
+					Name              string                 `json:"name"`
+					PreferredUsername string                 `json:"preferred_username"`
+					GivenName         string                 `json:"given_name"`
+					FamilyName        string                 `json:"family_name"`
+					RealmAccess       map[string]interface{} `json:"realm_access"`
 				}
 
 				if err := idToken.Claims(&claims); err == nil {
+					// Extract realm roles from Keycloak token
+					var keycloakRoles []string
+					if claims.RealmAccess != nil {
+						if rolesInterface, ok := claims.RealmAccess["roles"]; ok {
+							if rolesSlice, ok := rolesInterface.([]interface{}); ok {
+								for _, role := range rolesSlice {
+									if roleStr, ok := role.(string); ok {
+										keycloakRoles = append(keycloakRoles, roleStr)
+									}
+								}
+							}
+						}
+					}
+
+					// Debug: Log Keycloak roles
+					fmt.Printf("DEBUG: Keycloak roles for user %s: %v\n", claims.Subject, keycloakRoles)
+
 					// Try to find existing user by Keycloak ID
 					user, err := models.GetUserByKeycloakID(claims.Subject)
 					if err != nil {
+						fmt.Printf("DEBUG: User %s not found, creating new user\n", claims.Subject)
 						// User doesn't exist, create one
 						user = &models.User{
 							KeycloakID:    models.NullString(claims.Subject),
@@ -356,15 +387,24 @@ func LoadUserFromToken(next http.Handler) http.Handler {
 
 						// Create the user in the database
 						if err := models.CreateUser(user); err == nil {
-							// Assign default role to new users
-							defaultRole, roleErr := models.GetRoleByName("tenant")
-							if roleErr == nil {
-								if assignErr := models.AssignRole(user.ID, defaultRole.ID, nil); assignErr != nil {
-									// Log error but don't fail user creation
-								}
-								// Reload user with roles
-								user, _ = models.GetUserByID(user.ID)
-							}
+							fmt.Printf("DEBUG: User created with ID %d, assigning roles: %v\n", user.ID, keycloakRoles)
+							// Assign roles based on Keycloak realm roles
+							assignRolesFromKeycloak(user.ID, keycloakRoles)
+							// Reload user with roles
+							user, _ = models.GetUserByID(user.ID)
+							fmt.Printf("DEBUG: User after role assignment has %d roles\n", len(user.Roles))
+						} else {
+							fmt.Printf("DEBUG: Failed to create user: %v\n", err)
+						}
+					} else {
+						fmt.Printf("DEBUG: Found existing user %s (ID: %d), syncing roles\n", claims.Subject, user.ID)
+						// User exists, sync roles from Keycloak
+						assignRolesFromKeycloak(user.ID, keycloakRoles)
+						// Reload user with updated roles
+						user, _ = models.GetUserByID(user.ID)
+						fmt.Printf("DEBUG: User after role sync has %d roles\n", len(user.Roles))
+						for _, role := range user.Roles {
+							fmt.Printf("DEBUG: User has role: %s\n", role.Name)
 						}
 					}
 
@@ -453,4 +493,73 @@ func getClientIP(r *http.Request) string {
 
 	// Fall back to RemoteAddr
 	return r.RemoteAddr
+}
+
+// assignRolesFromKeycloak maps Keycloak realm roles to application roles
+func assignRolesFromKeycloak(userID int, keycloakRoles []string) {
+	fmt.Printf("DEBUG: assignRolesFromKeycloak called with userID=%d, roles=%v\n", userID, keycloakRoles)
+
+	// Role mapping from Keycloak realm roles to application roles
+	roleMapping := map[string]string{
+		"admin":            "admin",
+		"property_manager": "property_manager",
+		"tenant":           "tenant",
+		"viewer":           "viewer",
+	}
+
+	// First, remove all existing roles for this user to ensure clean sync
+	// This is a simple approach - in production you might want more sophisticated role management
+	for _, appRole := range roleMapping {
+		appRoleRecord, err := models.GetRoleByName(appRole)
+		if err == nil {
+			// Remove existing role assignment (ignore errors if not assigned)
+			err = models.RemoveRole(userID, appRoleRecord.ID)
+			if err != nil {
+				fmt.Printf("DEBUG: Failed to remove role %s from user %d: %v\n", appRole, userID, err)
+			}
+		} else {
+			fmt.Printf("DEBUG: Failed to get role %s: %v\n", appRole, err)
+		}
+	}
+
+	// Assign roles based on Keycloak roles
+	assignedCount := 0
+	for _, keycloakRole := range keycloakRoles {
+		if appRole, exists := roleMapping[keycloakRole]; exists {
+			fmt.Printf("DEBUG: Mapping Keycloak role '%s' to app role '%s'\n", keycloakRole, appRole)
+			appRoleRecord, err := models.GetRoleByName(appRole)
+			if err == nil {
+				// Assign the role (ignore errors if already assigned)
+				err = models.AssignRole(userID, appRoleRecord.ID, nil)
+				if err != nil {
+					fmt.Printf("DEBUG: Failed to assign role %s to user %d: %v\n", appRole, userID, err)
+				} else {
+					fmt.Printf("DEBUG: Successfully assigned role %s to user %d\n", appRole, userID)
+					assignedCount++
+				}
+			} else {
+				fmt.Printf("DEBUG: Failed to get role %s: %v\n", appRole, err)
+			}
+		} else {
+			fmt.Printf("DEBUG: Keycloak role '%s' not mapped to any app role\n", keycloakRole)
+		}
+	}
+
+	// If no mapped roles were found, assign default tenant role
+	if assignedCount == 0 {
+		fmt.Printf("DEBUG: No roles assigned, assigning default 'tenant' role\n")
+		defaultRole, err := models.GetRoleByName("tenant")
+		if err == nil {
+			err = models.AssignRole(userID, defaultRole.ID, nil)
+			if err != nil {
+				fmt.Printf("DEBUG: Failed to assign default tenant role: %v\n", err)
+			} else {
+				fmt.Printf("DEBUG: Successfully assigned default tenant role\n")
+			}
+		} else {
+			fmt.Printf("DEBUG: Failed to get default tenant role: %v\n", err)
+		}
+	}
+
+	fmt.Printf("DEBUG: assignRolesFromKeycloak completed, assigned %d roles\n", assignedCount)
 }

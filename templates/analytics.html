@@ -1,0 +1,615 @@
+{{template "base.html" .}}
+
+{{block "content" .}}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
+                <p class="text-gray-600 mt-1">Real-time insights and key performance indicators</p>
+            </div>
+            <div class="flex space-x-3">
+                <select id="timeRangeSelector" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="7">Last 7 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="365">Last year</option>
+                </select>
+                <button id="refreshData" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Properties</p>
+                    <p id="totalProperties" class="text-2xl font-bold text-gray-900">--</p>
+                    <p id="propertiesTrend" class="text-sm text-gray-500">--</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+                <div class="bg-green-100 p-3 rounded-lg">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Monthly Revenue</p>
+                    <p id="monthlyRevenue" class="text-2xl font-bold text-gray-900">--</p>
+                    <p id="revenueTrend" class="text-sm text-gray-500">--</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+                <div class="bg-yellow-100 p-3 rounded-lg">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Occupancy Rate</p>
+                    <p id="occupancyRate" class="text-2xl font-bold text-gray-900">--</p>
+                    <p id="occupancyTrend" class="text-sm text-gray-500">--</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+                <div class="bg-purple-100 p-3 rounded-lg">
+                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Tenants</p>
+                    <p id="totalTenants" class="text-2xl font-bold text-gray-900">--</p>
+                    <p id="tenantsTrend" class="text-sm text-gray-500">--</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Revenue Trend Chart -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Revenue Trend</h3>
+                <div class="flex space-x-2">
+                    <button class="chart-period-btn active" data-chart="revenue" data-period="6m">6M</button>
+                    <button class="chart-period-btn" data-chart="revenue" data-period="1y">1Y</button>
+                    <button class="chart-period-btn" data-chart="revenue" data-period="all">All</button>
+                </div>
+            </div>
+            <div class="relative h-80">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Occupancy Rate Chart -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Occupancy Rate</h3>
+                <div class="flex space-x-2">
+                    <button class="chart-period-btn active" data-chart="occupancy" data-period="6m">6M</button>
+                    <button class="chart-period-btn" data-chart="occupancy" data-period="1y">1Y</button>
+                    <button class="chart-period-btn" data-chart="occupancy" data-period="all">All</button>
+                </div>
+            </div>
+            <div class="relative h-80">
+                <canvas id="occupancyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Performance and Maintenance Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Property Performance -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Property Performance</h3>
+            <div class="relative h-80">
+                <canvas id="propertyPerformanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Maintenance Summary -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Maintenance Summary</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Open Requests</span>
+                    <span id="openRequests" class="font-semibold text-red-600">--</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">In Progress</span>
+                    <span id="inProgressRequests" class="font-semibold text-yellow-600">--</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Completed This Month</span>
+                    <span id="completedRequests" class="font-semibold text-green-600">--</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Avg Resolution Time</span>
+                    <span id="avgResolutionTime" class="font-semibold text-gray-900">--</span>
+                </div>
+            </div>
+            <div class="mt-6">
+                <h4 class="text-sm font-medium text-gray-700 mb-3">Priority Breakdown</h4>
+                <div class="relative h-40">
+                    <canvas id="maintenancePriorityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Analysis Section -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">Trend Analysis</h3>
+            <select id="trendMetricSelector" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="Monthly Revenue">Monthly Revenue</option>
+                <option value="Occupancy Rate">Occupancy Rate</option>
+                <option value="Average Rent">Average Rent</option>
+                <option value="Maintenance Response Time">Maintenance Response Time</option>
+            </select>
+        </div>
+
+        <div id="trendAnalysisResults" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Trend analysis results will be populated here -->
+            <div class="text-center text-gray-500 py-8">
+                <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Loading trend analysis...
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chart-period-btn {
+    @apply px-3 py-1 text-sm font-medium text-gray-500 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors;
+}
+
+.chart-period-btn.active {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+}
+
+.trend-card {
+    @apply bg-gradient-to-r p-4 rounded-lg text-white;
+}
+
+.trend-increasing {
+    @apply from-green-400 to-green-600;
+}
+
+.trend-decreasing {
+    @apply from-red-400 to-red-600;
+}
+
+.trend-stable {
+    @apply from-gray-400 to-gray-600;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let charts = {};
+    let currentTimeRange = 30;
+
+    // Initialize
+    loadAnalyticsData();
+    loadTrendAnalysis('Monthly Revenue');
+
+    // Event listeners
+    document.getElementById('timeRangeSelector').addEventListener('change', function() {
+        currentTimeRange = parseInt(this.value);
+        loadAnalyticsData();
+    });
+
+    document.getElementById('refreshData').addEventListener('click', function() {
+        loadAnalyticsData();
+        const selectedMetric = document.getElementById('trendMetricSelector').value;
+        loadTrendAnalysis(selectedMetric);
+    });
+
+    document.getElementById('trendMetricSelector').addEventListener('change', function() {
+        loadTrendAnalysis(this.value);
+    });
+
+    // Chart period buttons
+    document.querySelectorAll('.chart-period-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const chart = this.dataset.chart;
+            const period = this.dataset.period;
+
+            // Update active state
+            document.querySelectorAll(`[data-chart="${chart}"]`).forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            // Update chart data based on period
+            updateChartPeriod(chart, period);
+        });
+    });
+
+    async function loadAnalyticsData() {
+        try {
+            showLoading();
+
+            // Load different stats
+            await Promise.all([
+                loadPropertyStats(),
+                loadFinancialStats(),
+                loadTenantStats(),
+                loadMaintenanceStats()
+            ]);
+
+            // Load charts
+            await Promise.all([
+                loadRevenueChart(),
+                loadOccupancyChart(),
+                loadPropertyPerformanceChart(),
+                loadMaintenancePriorityChart()
+            ]);
+
+        } catch (error) {
+            console.error('Error loading analytics data:', error);
+            showError('Failed to load analytics data');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function loadPropertyStats() {
+        try {
+            const response = await fetch('/api/stats/properties');
+            if (response.ok) {
+                const stats = await response.json();
+                updatePropertyKPIs(stats);
+            }
+        } catch (error) {
+            console.error('Error loading property stats:', error);
+        }
+    }
+
+    async function loadFinancialStats() {
+        try {
+            const response = await fetch('/api/stats/financial');
+            if (response.ok) {
+                const stats = await response.json();
+                updateFinancialKPIs(stats);
+            }
+        } catch (error) {
+            console.error('Error loading financial stats:', error);
+        }
+    }
+
+    async function loadTenantStats() {
+        try {
+            const response = await fetch('/api/stats/tenants');
+            if (response.ok) {
+                const stats = await response.json();
+                updateTenantKPIs(stats);
+            }
+        } catch (error) {
+            console.error('Error loading tenant stats:', error);
+        }
+    }
+
+    async function loadMaintenanceStats() {
+        try {
+            const response = await fetch('/api/stats/maintenance');
+            if (response.ok) {
+                const stats = await response.json();
+                updateMaintenanceKPIs(stats);
+            }
+        } catch (error) {
+            console.error('Error loading maintenance stats:', error);
+        }
+    }
+
+    function updatePropertyKPIs(stats) {
+        document.getElementById('totalProperties').textContent = stats.total_properties || 0;
+
+        const occupancyRate = stats.occupancy_rate || 0;
+        document.getElementById('occupancyRate').textContent = occupancyRate.toFixed(1) + '%';
+
+        // Update trends (placeholder data)
+        document.getElementById('propertiesTrend').textContent = '+2% from last month';
+        document.getElementById('occupancyTrend').textContent = occupancyRate > 80 ? '+5% from last month' : '-2% from last month';
+    }
+
+    function updateFinancialKPIs(stats) {
+        const revenue = stats.monthly_revenue || 0;
+        document.getElementById('monthlyRevenue').textContent = '$' + revenue.toLocaleString();
+        document.getElementById('revenueTrend').textContent = '+12% from last month';
+    }
+
+    function updateTenantKPIs(stats) {
+        document.getElementById('totalTenants').textContent = stats.total_tenants || 0;
+        document.getElementById('tenantsTrend').textContent = '+3 new this month';
+    }
+
+    function updateMaintenanceKPIs(stats) {
+        document.getElementById('openRequests').textContent = stats.open_requests || 0;
+        document.getElementById('inProgressRequests').textContent = stats.in_progress || 0;
+        document.getElementById('completedRequests').textContent = stats.completed_this_month || 0;
+        document.getElementById('avgResolutionTime').textContent = (stats.avg_resolution_time || 0).toFixed(1) + ' days';
+    }
+
+    async function loadRevenueChart() {
+        // Sample data - replace with actual API call
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+
+        if (charts.revenue) {
+            charts.revenue.destroy();
+        }
+
+        charts.revenue = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [12000, 13500, 14200, 13800, 15200, 16000],
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async function loadOccupancyChart() {
+        const ctx = document.getElementById('occupancyChart').getContext('2d');
+
+        if (charts.occupancy) {
+            charts.occupancy.destroy();
+        }
+
+        charts.occupancy = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Occupancy Rate',
+                    data: [85, 82, 88, 90, 87, 85],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async function loadPropertyPerformanceChart() {
+        const ctx = document.getElementById('propertyPerformanceChart').getContext('2d');
+
+        if (charts.propertyPerformance) {
+            charts.propertyPerformance.destroy();
+        }
+
+        charts.propertyPerformance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Sunset Apartments', 'Oakwood Villas', 'Pine Ridge', 'Maple Heights'],
+                datasets: [{
+                    label: 'Occupancy Rate',
+                    data: [85, 92, 78, 88],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1
+                }, {
+                    label: 'Revenue Efficiency',
+                    data: [78, 85, 72, 80],
+                    backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                    borderColor: 'rgb(34, 197, 94)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async function loadMaintenancePriorityChart() {
+        const ctx = document.getElementById('maintenancePriorityChart').getContext('2d');
+
+        if (charts.maintenancePriority) {
+            charts.maintenancePriority.destroy();
+        }
+
+        charts.maintenancePriority = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['High', 'Medium', 'Low'],
+                datasets: [{
+                    data: [5, 12, 8],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(34, 197, 94, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(239, 68, 68)',
+                        'rgb(245, 158, 11)',
+                        'rgb(34, 197, 94)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    async function loadTrendAnalysis(metric) {
+        try {
+            const response = await fetch(`/api/analytics/trends/${encodeURIComponent(metric)}?category=financial&months=12`);
+            if (response.ok) {
+                const analysis = await response.json();
+                displayTrendAnalysis(analysis);
+            } else {
+                displayTrendAnalysisError();
+            }
+        } catch (error) {
+            console.error('Error loading trend analysis:', error);
+            displayTrendAnalysisError();
+        }
+    }
+
+    function displayTrendAnalysis(analysis) {
+        const container = document.getElementById('trendAnalysisResults');
+        container.innerHTML = '';
+
+        // Trend Type Card
+        const trendCard = document.createElement('div');
+        trendCard.className = `trend-card trend-${analysis.trend_type}`;
+        trendCard.innerHTML = `
+            <h4 class="font-semibold mb-2">Trend Direction</h4>
+            <p class="text-2xl font-bold">${analysis.trend_type.toUpperCase()}</p>
+            <p class="text-sm opacity-90">${analysis.change_rate.toFixed(1)}% change</p>
+        `;
+        container.appendChild(trendCard);
+
+        // Correlation Card
+        const correlationCard = document.createElement('div');
+        correlationCard.className = 'bg-white border border-gray-200 rounded-lg p-4';
+        correlationCard.innerHTML = `
+            <h4 class="font-semibold text-gray-900 mb-2">Correlation</h4>
+            <p class="text-2xl font-bold text-gray-900">${(analysis.correlation * 100).toFixed(1)}%</p>
+            <p class="text-sm text-gray-600">Time correlation</p>
+        `;
+        container.appendChild(correlationCard);
+
+        // Insights Card
+        const insightsCard = document.createElement('div');
+        insightsCard.className = 'bg-white border border-gray-200 rounded-lg p-4';
+        insightsCard.innerHTML = `
+            <h4 class="font-semibold text-gray-900 mb-2">Insights</h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+                ${analysis.insights.map(insight => `<li>• ${insight}</li>`).join('')}
+            </ul>
+        `;
+        container.appendChild(insightsCard);
+    }
+
+    function displayTrendAnalysisError() {
+        const container = document.getElementById('trendAnalysisResults');
+        container.innerHTML = `
+            <div class="col-span-3 text-center text-gray-500 py-8">
+                <p>Unable to load trend analysis</p>
+                <p class="text-sm">Please try again later</p>
+            </div>
+        `;
+    }
+
+    function updateChartPeriod(chartType, period) {
+        // This would update the chart data based on the selected period
+        console.log(`Updating ${chartType} chart for period: ${period}`);
+        // Implementation would fetch new data and update the chart
+    }
+
+    function showLoading() {
+        // Show loading indicator
+        console.log('Loading analytics data...');
+    }
+
+    function hideLoading() {
+        // Hide loading indicator
+        console.log('Analytics data loaded');
+    }
+
+    function showError(message) {
+        console.error(message);
+        // Show error notification
+    }
+});
+</script>
+{{end}}

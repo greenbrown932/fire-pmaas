@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+    <head>
+        <title>New Property</title>
+        <link rel="stylesheet" href="/static/css/style.css" />
+    </head>
+    <body>
+        <h1>New Property</h1>
+        <form action="/properties/new" method="post">
+            <label for="Name">Name:</label><br />
+            <input type="text" id="Name" name="Name" /><br /><br />
+            <label for="Address">Address:</label><br />
+            <input type="text" id="Address" name="Address" /><br /><br />
+            <label for="PropertyType">Property Type:</label><br />
+            <input
+                type="text"
+                id="PropertyType"
+                name="PropertyType"
+            /><br /><br />
+            <label for="Tags">Tags:</label><br />
+            <input type="text" id="Tags" name="Tags" /><br /><br />
+            <input type="submit" value="Submit" />
+        </form>
+    </body>
+</html>

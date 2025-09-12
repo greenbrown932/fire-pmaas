@@ -22,9 +22,19 @@ func main() {
 	runMigrations()
 	db.InitDB()
 
-	// Initialize OIDC provider
+	// Initialize OIDC provider with retry mechanism
+	maxRetries := 10
+	retryInterval := 3 * time.Second
+	for i := 0; i < maxRetries; i++ {
+		err := firemiddleware.InitOIDC()
+		if err == nil {
+			break
+		}
+		log.Printf("Failed to initialize OIDC (attempt %d): %v", i+1, err)
+		time.Sleep(retryInterval)
+	}
 	if err := firemiddleware.InitOIDC(); err != nil {
-		log.Fatalf("Failed to initialize OIDC: %v", err)
+		log.Fatalf("Failed to initialize OIDC after multiple retries: %v", err)
 	}
 
 	r := chi.NewRouter()
